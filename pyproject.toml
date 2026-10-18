@@ -1,7 +1,7 @@
 [project]
-name = "dofus-touch-economy-analytics"
+name = "dofus-economy-analytics"
 version = "0.1.0"
-description = "Analytics engineering for a player-observed Dofus Touch economy"
+description = "Analytics engineering for player-observed Dofus and Dofus Touch economies"
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "alembic==1.19.0",

@@ -418,7 +418,7 @@ wheels = [
 ]
 
 [[package]]
-name = "dofus-touch-economy-analytics"
+name = "dofus-economy-analytics"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

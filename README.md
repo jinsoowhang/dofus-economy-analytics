@@ -46,6 +46,17 @@ Requirements:
 - Git
 - `uv`
 
+Clone the repository and open the project directory:
+
+```bash
+git clone https://github.com/jinsoowhang/dofus-economy-analytics.git
+cd dofus-economy-analytics
+```
+
+The Python distribution is named `dofus-economy-analytics`. The Python import package
+remains `dofus_touch_economy`, and the dbt project/profile remains
+`dofus_touch_economy_analytics` for compatibility with existing hosted configuration.
+
 Install the locked Python 3.12 environment:
 
 ```bash

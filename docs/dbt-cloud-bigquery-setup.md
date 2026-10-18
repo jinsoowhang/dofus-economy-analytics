@@ -105,7 +105,7 @@ set **Maximum bytes billed** there.
 The repository is:
 
 ```text
-https://github.com/jinsoowhang/dofus-touch-economy-analytics
+https://github.com/jinsoowhang/dofus-economy-analytics
 ```
 
 Use dbt's native GitHub integration and grant the dbt GitHub application access only

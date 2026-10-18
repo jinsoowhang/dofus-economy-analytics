@@ -73,7 +73,7 @@ location rules in `deploy/npm-advanced.conf`. Keep the static service running.
 
 ## Private server configuration
 
-Clone the public source to `/opt/dofus-touch-economy-analytics`. Keep all runtime
+Clone the public source to `/opt/dofus-economy-analytics`. Keep all runtime
 configuration outside that checkout. The following commands run as root on the
 VPS, with secrets entered through hidden prompts:
 

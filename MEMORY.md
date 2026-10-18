@@ -1,8 +1,21 @@
 # Memory
 
-**Last updated:** 2026-10-17
+**Last updated:** 2026-10-18
 
-## Dofus Touch Economy Analytics
+## Dofus Economy Analytics
+
+- The owner requested renaming the repository and local project to
+  `dofus-economy-analytics`. GitHub is now
+  `jinsoowhang/dofus-economy-analytics`, and `origin` uses the new URL. The Python
+  distribution has the same new name. Preserve the `dofus_touch_economy` import
+  package, CLI commands, and `dofus_touch_economy_analytics` dbt project/profile
+  identifiers for compatibility. Historical design/session records retain their
+  original names; active repository links and clone instructions use the new name.
+- The local checkout is now `Project/dofus-economy-analytics`; the installed
+  screenshot catch-up skill symlink targets its new location. Windows locked
+  nested directories during the move, so only empty directory shells remain under
+  the old path. They contain no project files. Rebuild the root `.venv` when moving
+  the checkout because console scripts contain absolute interpreter paths.
 
 - October 17 GitHub publication separates the screenshot catch-up workflow,
   private hosting preparation, daily crafting page, and Dofus game/server support
@@ -22,7 +35,7 @@
   remembers the choice; explicit tab URLs, hidden form values, and HTMX/fetch
   context pin reads and writes to that tab's workspace. Existing browser cart and
   checklist keys remain Blair's; PC uses separate keys. The public app label is
-  Dofus Economy; the package/repository paths remain unchanged.
+  Dofus Economy; the Python import package remains `dofus_touch_economy`.
 - Game/server workspaces use separate SQLite databases with the same Alembic schema.
   Existing `DOFUS_APP_DATABASE_PATH` and the stored market string remain Blair's
   unchanged history; PC uses `DOFUS_PC_DATABASE_PATH` or adjacent
