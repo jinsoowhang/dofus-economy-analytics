@@ -1,7 +1,7 @@
 "use strict";
 
 const homeRoot = document.querySelector("#home");
-const homeStorageKey = "dofus-home-checklist-v1";
+const homeStorageKey = window.economyStorageKey("dofus-home-checklist-v1");
 const homeCheckboxes = Array.from(homeRoot.querySelectorAll("[data-task-key]"));
 const homeToday = homeRoot.dataset.today;
 const homeNextDay = Date.parse(homeRoot.dataset.nextDayAt);

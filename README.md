@@ -1,6 +1,6 @@
-# Dofus Touch Economy Analytics
+# Dofus Economy Analytics
 
-Local-first economy tracking and hosted analytics for player-observed Dofus Touch
+Local-first economy tracking and hosted analytics for player-observed Dofus and Dofus Touch
 items, recipes, market prices, crafting economics, and Sales listings.
 
 This is an unofficial fan project and is not affiliated with, endorsed by, or sponsored by Ankama. Dofus Touch and related names belong to their respective owners.
@@ -62,6 +62,26 @@ uv run dofus-web
 ```
 
 The local command binds to `127.0.0.1:8000` and rejects non-loopback binding.
+The top-right Game and Server controls select **Dofus Touch / Blair** or
+**Dofus / Tal Kasha** and remember the choice in the browser. Each selection uses
+its own SQLite database, prices, Sales history, reports, calculator cart, and checklist.
+The existing database and its stored market identifier remain Blair's history.
+
+Initialize the modern Dofus catalog, recipes, and icon cache independently:
+
+```bash
+uv run dofus-sync-pc
+# Optional starting estimates for exact, unambiguous Blair item/category matches:
+uv run dofus-sync-pc --benchmark-touch
+```
+
+Dofus imports a pinned [Dofusdude Dofus 3 release](https://github.com/dofusdude/dofus3-main/releases).
+No Tal Kasha market prices or Sales history are included in that source. Optional
+Touch benchmarks carry explicit provenance and visible notices; they are estimates,
+and unmatched prices stay missing. Enter prices observed on Tal Kasha as you play.
+See [game/server workspaces](docs/game-server-workspaces.md) for storage, source
+research, synchronization, and analytical publication details.
+
 For private VPS hosting with Gmail sign-in, use the separate
 [Docker and Google authentication deployment](docs/vps-deployment.md). It keeps
 FastAPI behind the login proxy, allows only explicitly listed Google accounts, and

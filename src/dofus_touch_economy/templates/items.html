@@ -1,14 +1,15 @@
 {% extends "base.html" %}
-{% block title %}Item Search · Dofus Touch Economy{% endblock %}
+{% block title %}Item Search · Dofus Economy{% endblock %}
 {% block content %}
   <h1>Item Search</h1>
   <p class="price-entry-help">Craftable-item prices use <strong>thousands of kamas</strong>: <strong>77 = 77,000 kamas</strong>. Other items use <strong>full kamas</strong>: 77 = 77 kamas. Check the unit beside each field.</p>
   <p class="page-description">Search the catalog, edit current prices, compare weights, and open an item for detailed analysis.</p>
-  <p>Market: {{ market_context }}</p>
+  <p>Market: {{ world.server }}</p>
   {% if notification %}
     <p class="notification" role="status">{{ notification }}</p>
   {% endif %}
   <form method="get" action="/items" class="search-form">
+      <input type="hidden" name="world" value="{{ world.key }}">
     <details class="filter-multiselect">
       <summary>
         Categories{% if category_filters %} · {{ category_filters | length }} selected{% else %} · All{% endif %}

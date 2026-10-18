@@ -227,6 +227,7 @@ def _current_price_response(observation: PriceObservation) -> CurrentPriceRespon
         observed_at=_as_utc(observation.observed_at),
         recorded_at=_as_utc(observation.recorded_at),
         market_context=observation.market_context,
+        source=observation.source,
     )
 
 
@@ -235,7 +236,6 @@ def _observation_response(observation: PriceObservation) -> PriceObservationResp
         **_current_price_response(observation).model_dump(),
         item_uuid=observation.item.uuid,
         note=observation.note,
-        source=observation.source,
         invalidated_at=(
             None if observation.invalidated_at is None else _as_utc(observation.invalidated_at)
         ),

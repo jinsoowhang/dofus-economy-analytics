@@ -45,7 +45,7 @@
     <p class="dashboard-chart-readout" aria-live="polite">Point to or focus a day to see its value.</p>
   </figure>
 {% endmacro %}
-{% block title %}Dashboard · Dofus Touch Economy{% endblock %}
+{% block title %}Dashboard · Dofus Economy{% endblock %}
 {% block content %}
 <div class="dashboard">
   <div class="dashboard-header">
@@ -61,6 +61,7 @@
     </nav>
   </div>
   <form method="get" action="/dashboard" class="dashboard-filters" aria-label="Dashboard filters">
+      <input type="hidden" name="world" value="{{ world.key }}">
     <input type="hidden" name="days" value="{{ report.days }}">
     <label>Item name<input type="search" name="q" maxlength="200" value="{{ item_query }}" placeholder="Contains…"></label>
     <details class="filter-multiselect">

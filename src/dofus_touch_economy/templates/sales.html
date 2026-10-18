@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Sales Activity · Dofus Touch Economy{% endblock %}
+{% block title %}Sales Activity · Dofus Economy{% endblock %}
 {% block content %}
   <h1>Sales Activity</h1>
   <p class="price-entry-help">Enter prices in <strong>thousands of kamas</strong>: <strong>77 = 77,000 kamas</strong>; 0.5 = 500 kamas. Totals and history show full kamas.</p>
@@ -21,6 +21,7 @@
       </span>
     </summary>
     <form method="get" action="/sales" class="sales-filter-form">
+      <input type="hidden" name="world" value="{{ world.key }}">
       <input type="hidden" name="price_unit" value="thousands">
       <input type="hidden" name="active_sort" value="{{ sort_state.active_sort }}">
       <input type="hidden" name="active_direction" value="{{ sort_state.active_direction }}">
@@ -108,6 +109,7 @@
         class="bulk-actions"
         data-preserve-scroll
       >
+      <input type="hidden" name="world" value="{{ world.key }}">
         <span id="active-sales-selection-count" class="bulk-selection-count" aria-live="polite">0 selected</span>
         <button type="submit" name="action" value="mark_sold" disabled>Mark selected sold</button>
         <button
@@ -183,6 +185,7 @@
                     data-other-active-count="{{ active_counts_by_item.get(sale.item_uuid, 1) - 1 }}"
                     data-item-name="{{ sale.display_name }}"
                   >
+      <input type="hidden" name="world" value="{{ world.key }}">
                     <input type="hidden" name="price_unit" value="thousands">
                     <input type="hidden" name="apply_to_same_item" value="false">
                     <label class="visually-hidden" for="sale-price-{{ sale.uuid }}">
@@ -214,6 +217,7 @@
                         class="inline-form price-review-form"
                         data-preserve-scroll
                       >
+      <input type="hidden" name="world" value="{{ world.key }}">
                         <input type="hidden" name="asking_price" value="{{ price_review.suggested_price }}">
                         <button
                           type="submit"
@@ -248,6 +252,7 @@
                       class="inline-form"
                       data-preserve-scroll
                     >
+      <input type="hidden" name="world" value="{{ world.key }}">
                       <button
                         type="submit"
                         class="action-icon-button secondary-button"
@@ -261,6 +266,7 @@
                       class="inline-form"
                       data-preserve-scroll
                     >
+      <input type="hidden" name="world" value="{{ world.key }}">
                       <button
                         type="submit"
                         class="action-icon-button"
@@ -275,6 +281,7 @@
                       data-preserve-scroll
                       onsubmit="return window.confirm('Delete this sales row? This cannot be undone.')"
                     >
+      <input type="hidden" name="world" value="{{ world.key }}">
                       <button
                         type="submit"
                         class="delete-button"
@@ -359,6 +366,7 @@
                 <td>
                   <div class="row-actions">
                     <form method="post" action="/sales/{{ sale.uuid }}/reopen?{{ sales_sort_query }}" class="inline-form">
+      <input type="hidden" name="world" value="{{ world.key }}">
                       <button
                         type="submit"
                         class="reopen-button"
@@ -372,6 +380,7 @@
                       class="inline-form"
                       onsubmit="return window.confirm('Delete this sales row? This cannot be undone.')"
                     >
+      <input type="hidden" name="world" value="{{ world.key }}">
                       <button
                         type="submit"
                         class="delete-button"
@@ -552,6 +561,7 @@
   <dialog id="same-item-price-dialog" class="price-confirm-dialog" aria-labelledby="same-item-price-prompt">
     <p id="same-item-price-prompt"></p>
     <form method="dialog" class="bulk-actions">
+      <input type="hidden" name="world" value="{{ world.key }}">
       <button value="yes">Yes</button>
       <button value="no" class="secondary-button" autofocus>No</button>
     </form>

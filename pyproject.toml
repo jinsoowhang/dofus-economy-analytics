@@ -18,6 +18,7 @@ dependencies = [
 ]
 
 [project.scripts]
+dofus-sync-pc = "dofus_touch_economy.cli:sync_pc_main"
 dofus-evaluate-captures = "dofus_touch_economy.cli:capture_eval_main"
 dofus-import = "dofus_touch_economy.cli:import_main"
 dofus-load-bigquery = "dofus_touch_economy.cli:load_bigquery_main"

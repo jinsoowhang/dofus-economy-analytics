@@ -1,9 +1,9 @@
 "use strict";
 
-const salesRecipeCartStorageKey = "dofus-recipe-calculator-cart-v1";
-const salesRecipeSelectionStorageKey = "dofus-recipe-calculator-selection-v1";
+const salesRecipeCartStorageKey = window.economyStorageKey("dofus-recipe-calculator-cart-v1");
+const salesRecipeSelectionStorageKey = window.economyStorageKey("dofus-recipe-calculator-selection-v1");
 const recipeCalculatorPendingSalesStorageKey =
-  "dofus-recipe-calculator-pending-sales-v1";
+  window.economyStorageKey("dofus-recipe-calculator-pending-sales-v1");
 
 const removeCompletedRecipeCalculatorSales = () => {
   const parameters = new URLSearchParams(window.location.search);
@@ -177,7 +177,7 @@ if (activeSalesBulkForm && activeSalesSelectAll && activeSaleCheckboxes.length >
   updateBulkSelection();
 }
 
-const salesScrollStorageKey = "dofus-sales-scroll-y";
+const salesScrollStorageKey = window.economyStorageKey("dofus-sales-scroll-y");
 
 for (const form of document.querySelectorAll("form[data-preserve-scroll]")) {
   form.addEventListener("submit", (event) => {

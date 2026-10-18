@@ -1,5 +1,5 @@
 (() => {
-  const scrollStorageKey = "dofus-catalog-price-scroll-position";
+  const scrollStorageKey = window.economyStorageKey("dofus-catalog-price-scroll-position");
 
   const rememberScrollPosition = () => {
     try {

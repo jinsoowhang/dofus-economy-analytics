@@ -1,5 +1,12 @@
 # Architecture
 
+The Game/Server selector chooses an independent operational SQLite workspace:
+Dofus Touch / Blair retains the existing database, while modern Dofus / Tal Kasha
+uses a separate database with the same schema. The selected workspace also scopes
+browser state, APIs, reports, and BigQuery Sync targets. See
+[game/server workspaces](game-server-workspaces.md) for the storage boundary,
+versioned PC catalog source, and explicitly labeled Touch starting-price benchmarks.
+
 The project separates mutable local application state from reproducible downstream analytics while keeping all observed source data private.
 
 ## System flow

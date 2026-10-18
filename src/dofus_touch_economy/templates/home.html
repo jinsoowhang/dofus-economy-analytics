@@ -9,7 +9,7 @@
     </div>
   </li>
 {% endmacro %}
-{% block title %}Home · Dofus Touch Economy{% endblock %}
+{% block title %}Home · Dofus Economy{% endblock %}
 {% block content %}
   {% set task_count = report.daily_tasks | length + (1 if report.focus else 0) %}
   <div id="home" data-today="{{ report.today.isoformat() }}" data-next-day-at="{{ report.next_day_at.isoformat() }}">

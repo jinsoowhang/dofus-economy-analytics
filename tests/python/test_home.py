@@ -182,7 +182,7 @@ def test_home_page_is_read_only_and_has_small_query_count(client, session_factor
     assert response.status_code == 200
     assert len(statements) == 5
     assert all(statement.lstrip().upper().startswith("SELECT") for statement in statements)
-    assert "Home · Dofus Touch Economy" in response.text
+    assert "Home · Dofus Economy" in response.text
     assert 'href="/" class="site-tab is-active" aria-current="page"' in response.text
     assert 'data-task-key="sales"' in response.text
     assert 'data-task-key="dashboard"' in response.text

@@ -146,9 +146,10 @@ class CatalogRepository:
             select(Item)
             .where(Item.uuid == item_uuid, active_catalog_item_clause(Item))
             .options(
+                selectinload(Item.recipes).joinedload(Recipe.source_record),
                 selectinload(Item.recipes)
                 .selectinload(Recipe.ingredients)
-                .selectinload(RecipeIngredient.item)
+                .selectinload(RecipeIngredient.item),
             )
         )
         return self._session.scalar(statement)

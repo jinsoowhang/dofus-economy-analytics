@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Iterator
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -16,22 +16,58 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from dofus_touch_economy.bigquery_sync import BigQuerySyncManager
 from dofus_touch_economy.config import Settings
 from dofus_touch_economy.database import create_engine_for_url, create_session_factory
+from dofus_touch_economy.worlds import (
+    DEFAULT_WORLD,
+    WORLD_COOKIE,
+    WORLDS,
+    find_world,
+    validate_world_paths,
+    world_settings,
+    world_url,
+)
 
 UNSAFE_METHODS = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 
 
-def get_session(request: Request) -> Iterator[Session]:
-    factory: sessionmaker[Session] = request.app.state.session_factory
+async def _request_world(request: Request):
+    if request.method in UNSAFE_METHODS and request.headers.get("content-type", "").startswith(
+        ("application/x-www-form-urlencoded", "multipart/form-data")
+    ):
+        form = await request.form()
+        keys = form.getlist("world")
+        if keys:
+            if len(set(keys)) != 1:
+                raise HTTPException(400, "Conflicting game/server selections")
+            try:
+                submitted = find_world(str(keys[0]))
+            except ValueError as error:
+                raise HTTPException(400, str(error)) from error
+            if request.state.explicit_world and submitted != request.state.world:
+                raise HTTPException(400, "Conflicting game/server selections")
+            request.state.world = submitted
+            request.state.explicit_world = True
+    return request.state.world
+
+
+async def get_session(request: Request) -> AsyncIterator[Session]:
+    world = await _request_world(request)
+    factory: sessionmaker[Session] = request.app.state.world_session_factories[world.key]
+    settings = world_settings(request.app.state.settings, world)
+    if world != DEFAULT_WORLD and not settings.database_path.is_file():
+        raise HTTPException(503, "Dofus catalog is not initialized; run dofus-sync-pc first")
     with factory() as session:
         yield session
 
 
-def get_settings(request: Request) -> Settings:
-    return request.app.state.settings
+async def get_settings(request: Request) -> Settings:
+    return world_settings(request.app.state.settings, await _request_world(request))
 
 
-def get_bigquery_sync_manager(request: Request) -> BigQuerySyncManager:
-    return request.app.state.bigquery_sync_manager
+async def get_bigquery_sync_manager(request: Request) -> BigQuerySyncManager:
+    world = await _request_world(request)
+    if world == DEFAULT_WORLD:
+        return request.app.state.bigquery_sync_manager
+    return request.app.state.world_sync_managers[world.key]
 
 
 def create_app(
@@ -42,29 +78,86 @@ def create_app(
     from dofus_touch_economy.routers import api, web
 
     resolved_settings = settings or Settings.from_env()
-    owned_engine: Engine | None = None
+    validate_world_paths(resolved_settings)
+    owned_engines: list[Engine] = []
     if session_factory is None:
-        owned_engine = create_engine_for_url(resolved_settings.database_url)
-        session_factory = create_session_factory(owned_engine)
+        engine = create_engine_for_url(resolved_settings.database_url)
+        owned_engines.append(engine)
+        session_factory = create_session_factory(engine)
+    factories = {DEFAULT_WORLD.key: session_factory}
+    for world in WORLDS[1:]:
+        engine = create_engine_for_url(world_settings(resolved_settings, world).database_url)
+        owned_engines.append(engine)
+        factories[world.key] = create_session_factory(engine)
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
         yield
-        if owned_engine is not None:
-            owned_engine.dispose()
+        for engine in owned_engines:
+            engine.dispose()
 
-    application = FastAPI(title="Dofus Touch Economy", lifespan=lifespan)
+    application = FastAPI(title="Dofus Economy", lifespan=lifespan)
     application.state.settings = resolved_settings
     application.state.session_factory = session_factory
+    application.state.world_session_factories = factories
     application.state.bigquery_sync_manager = bigquery_sync_manager or BigQuerySyncManager(
         resolved_settings.bigquery_project_id,
         resolved_settings.bigquery_location,
         resolved_settings.bigquery_datasets,
         resolved_settings.database_path,
     )
+    application.state.world_sync_managers = {
+        DEFAULT_WORLD.key: application.state.bigquery_sync_manager,
+    }
+    for world in WORLDS[1:]:
+        scoped = world_settings(resolved_settings, world)
+        application.state.world_sync_managers[world.key] = BigQuerySyncManager(
+            scoped.bigquery_project_id,
+            scoped.bigquery_location,
+            scoped.bigquery_datasets,
+            scoped.database_path,
+        )
+
+    @application.get("/select-world", include_in_schema=False)
+    def select_world(request: Request, game: str, server: str):
+        selected = next(
+            (world for world in WORLDS if world.game == game and world.key == server), None
+        )
+        if selected is None:
+            raise HTTPException(400, "Unknown game/server selection")
+        request.state.world = selected
+        response = RedirectResponse(world_url("/", selected), status_code=303)
+        response.set_cookie(
+            WORLD_COOKIE,
+            selected.key,
+            max_age=365 * 24 * 60 * 60,
+            httponly=True,
+            secure=resolved_settings.public_origin is not None,
+            samesite="lax",
+        )
+        return response
 
     @application.middleware("http")
     async def enforce_same_origin(request: Request, call_next):
+        explicit_keys = request.query_params.getlist("world")
+        header_world = request.headers.get("x-economy-world")
+        if header_world is not None:
+            explicit_keys.append(header_world)
+        if len(set(explicit_keys)) > 1:
+            return JSONResponse(
+                status_code=400, content={"detail": "Conflicting game/server selections"}
+            )
+        request.state.explicit_world = bool(explicit_keys)
+        try:
+            request.state.world = find_world(
+                explicit_keys[0]
+                if explicit_keys
+                else request.cookies.get(WORLD_COOKIE, DEFAULT_WORLD.key)
+            )
+        except ValueError as error:
+            if explicit_keys:
+                return JSONResponse(status_code=400, content={"detail": str(error)})
+            request.state.world = DEFAULT_WORLD
         origin = request.headers.get("origin")
         if request.method in UNSAFE_METHODS and resolved_settings.public_origin is not None:
             source = origin if origin is not None else request.headers.get("referer", "")
@@ -90,7 +183,20 @@ def create_app(
                 return JSONResponse(
                     status_code=403, content={"detail": "cross-origin request denied"}
                 )
-        return await call_next(request)
+        response = await call_next(request)
+        world = request.state.world
+        if "location" in response.headers and (
+            request.state.explicit_world or world != DEFAULT_WORLD
+        ):
+            response.headers["location"] = world_url(response.headers["location"], world)
+        if "hx-redirect" in response.headers and (
+            request.state.explicit_world or world != DEFAULT_WORLD
+        ):
+            response.headers["hx-redirect"] = world_url(response.headers["hx-redirect"], world)
+        if not request.url.path.startswith(("/static/", "/item-icons/")):
+            response.headers["Cache-Control"] = "no-store"
+            response.headers["X-Economy-World"] = world.key
+        return response
 
     application.add_middleware(
         TrustedHostMiddleware,

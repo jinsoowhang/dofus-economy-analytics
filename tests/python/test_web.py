@@ -63,7 +63,7 @@ def test_item_search_renders_matching_synthetic_item(client, catalog_item) -> No
 
     assert response.status_code == 200
     assert response.headers["content-encoding"] == "gzip"
-    assert "Dofus Touch Economy" in response.text
+    assert "Dofus Economy" in response.text
     assert catalog_item.display_name in response.text
     assert str(catalog_item.uuid) in response.text
 
@@ -106,7 +106,7 @@ def test_sales_page_has_active_tab_without_add_listing_form(
     assert 'class="site-tab is-active"' in response.text
     assert 'aria-current="page"' in response.text
     assert ">Activity</a>" in response.text
-    assert "<title>Sales Activity · Dofus Touch Economy</title>" in response.text
+    assert "<title>Sales Activity · Dofus Economy · Dofus Touch · Blair</title>" in response.text
     assert "<h1>Sales Activity</h1>" in response.text
     assert ">Best Sellers</a>" in response.text
     assert ">Out of Stock Items</a>" in response.text
@@ -137,7 +137,7 @@ def test_insights_page_synthesizes_sales_and_sits_in_data_menu(
     response = client.get("/insights")
 
     assert response.status_code == 200
-    assert "<title>Insights · Dofus Touch Economy</title>" in response.text
+    assert "<title>Insights · Dofus Economy · Dofus Touch · Blair</title>" in response.text
     assert "<h1>Insights</h1>" in response.text
     assert re.search(r'href="/insights"\s+class="site-submenu-link is-active"', response.text)
     assert 'aria-current="page"' in response.text
@@ -1199,10 +1199,11 @@ def test_recipes_page_filters_sorts_and_links_to_item_detail(
     assert "window.sessionStorage.setItem(recipeScrollStorageKey" in script.text
     cart_script = client.get("/static/recipe-cart.js")
     assert cart_script.status_code == 200
-    assert 'const recipeCartStorageKey = "dofus-recipe-calculator-cart-v1"' in cart_script.text
-    assert 'const recipeSelectionStorageKey = "dofus-recipe-calculator-selection-v1"' in (
-        cart_script.text
+    assert (
+        'const recipeCartStorageKey = window.economyStorageKey("dofus-recipe-calculator-cart-v1")'
+        in cart_script.text
     )
+    assert 'window.economyStorageKey("dofus-recipe-calculator-selection-v1")' in (cart_script.text)
     assert 'form.action = "/recipe-calculator"' in cart_script.text
     assert '<script src="/static/recipe-cart.js" defer></script>' in response.text
 
@@ -1724,9 +1725,7 @@ def test_recipe_calculator_selects_multiple_items_and_renders_shopping_list(
     assert "updateRowState(row)" in script.text
     assert "in cart" not in script.text
     assert "window.localStorage.setItem(recipeCartStorageKey" in script.text
-    assert 'const recipeSelectionStorageKey = "dofus-recipe-calculator-selection-v1"' in (
-        script.text
-    )
+    assert 'window.economyStorageKey("dofus-recipe-calculator-selection-v1")' in (script.text)
     assert 'calculatorSelectAll.addEventListener("click"' in script.text
     assert 'calculatorSelectNone.addEventListener("click"' in script.text
     assert "storedSelection.has(itemUuid)" in script.text
@@ -1748,9 +1747,7 @@ def test_recipe_calculator_selects_multiple_items_and_renders_shopping_list(
     assert 'formData.append("item_uuid", itemUuid)' in script.text
     assert "scheduleSuggestionRefresh()" in script.text
     assert 'event.target.closest(".calculator-suggestion-result")' in script.text
-    assert 'const recipeCalculatorScrollStorageKey = "dofus-recipe-calculator-scroll-position"' in (
-        script.text
-    )
+    assert 'window.economyStorageKey("dofus-recipe-calculator-scroll-position")' in (script.text)
     assert "String(window.scrollY)" in script.text
     assert "window.scrollTo(0, scrollPosition)" in script.text
 
@@ -2697,7 +2694,7 @@ def test_html_creates_manual_item_and_redirects_to_detail(client) -> None:
     detail = client.get(response.headers["location"])
     assert detail.status_code == 200
     assert "Chouquish Belt" in detail.text
-    assert "Belt · Market: Dodge" in detail.text
+    assert "Belt · Market: Blair" in detail.text
     assert "Catalog Source: Manual" in detail.text
 
 

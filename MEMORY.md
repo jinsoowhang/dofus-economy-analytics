@@ -4,6 +4,56 @@
 
 ## Dofus Touch Economy Analytics
 
+- October 17 GitHub publication separates the screenshot catch-up workflow,
+  private hosting preparation, daily crafting page, and Dofus game/server support
+  into atomic commits on `origin/main`. The full local check passes 496 Python
+  tests and all 126 dbt build/test nodes. Operational databases, imported game
+  data, icons, credentials, and private verification reports remain ignored.
+
+- The owner's modern Dofus / Tal Kasha professions are Hunter, Jeweller, and
+  Shoemaker. Use those workspace-specific defaults for Today's Crafting Items
+  and Profit Opportunities. Touch / Blair keeps Shoemaker, Jeweller, and Tailor.
+  Explicit profession filters still win. All three PC professions already have
+  source-backed recipes (including 47 Hunter recipes in the initial import), so
+  this preference changes recommendation scope, not recipe ingredient definitions.
+
+- The website now supports modern PC Dofus (excluding Retro) / Tal Kasha and
+  Dofus Touch / Blair through linked header selectors. A year-long browser cookie
+  remembers the choice; explicit tab URLs, hidden form values, and HTMX/fetch
+  context pin reads and writes to that tab's workspace. Existing browser cart and
+  checklist keys remain Blair's; PC uses separate keys. The public app label is
+  Dofus Economy; the package/repository paths remain unchanged.
+- Game/server workspaces use separate SQLite databases with the same Alembic schema.
+  Existing `DOFUS_APP_DATABASE_PATH` and the stored market string remain Blair's
+  unchanged history; PC uses `DOFUS_PC_DATABASE_PATH` or adjacent
+  `dofus_tal_kasha.sqlite3`, with market `Tal Kasha`. Request settings/session
+  factories are selected without mutating shared app state. Existing Touch CLI
+  commands and screenshot workflows continue to target Blair.
+- `uv run dofus-sync-pc` initializes/migrates only the PC database and imports one
+  pinned Dofusdude main-channel release, preserving source rows and official IDs.
+  Same-name PC variants use `identity_category=dofus:<Ankama ID>` and remain
+  distinct. Recipes resolve exact IDs and retain the source ingredient order.
+  PC profession levels use explicit source-derived result levels up to 200;
+  Touch retains its ingredient-slot rule. Legacy `touch_catalog_*` fields describe
+  PC membership inside the separate PC database. Downloads/icons stay ignored.
+- Initial PC import: Dofus 3 release 3.7.11.11, 13,469 items, 4,501 recipes,
+  13,462 cached icons, seven missing icons, one rejected unnamed-category internal
+  test item, and 242 out-of-scope recipes skipped. The optional
+  `--benchmark-touch` seeded 700 unique exact-name/category Blair matches with
+  `touch_blair_benchmark` provenance, original lot/time, and a source UUID note.
+  These are explicitly labeled estimates, not observed Tal Kasha prices. No PC
+  Sales history was fabricated, no Touch recipes were copied, and a read-only
+  before/after digest confirmed every Blair table unchanged.
+- Astrub exposes community Tal Kasha observations, but research found no documented
+  bulk interface suitable for ingestion. No community prices were scraped.
+  PC uses Dofusdude's versioned client-derived data rather than DofusDB's API;
+  see `docs/game-server-workspaces.md` for source research and operational commands.
+- BigQuery Sync has separate workspace controllers. Blair's targets stay unchanged;
+  PC dataset names append `_dofus_tal_kasha` to each configured base dataset.
+  No cloud provisioning/publication occurred. Existing hosted dbt remains Blair's
+  configuration; PC needs separately provisioned targets and a separate dbt target.
+  A PC snapshot dry run passed the unchanged schema contract.
+
 - Public identity: analytics engineering for player-observed Dofus Touch item prices, crafting economics, sales behavior.
 - VPS deployment preparation uses the existing Nginx Proxy Manager and a Docker
   Google OAuth2 Proxy gateway with an explicit private email allowlist. The app

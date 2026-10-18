@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Recipe Calculator · Dofus Touch Economy{% endblock %}
+{% block title %}Recipe Calculator · Dofus Economy{% endblock %}
 {% block content %}
   <h1>Recipe Calculator</h1>
   <p class="price-entry-help">Sale Price Each uses <strong>thousands of kamas</strong>: <strong>77 = 77,000 kamas</strong>. Ingredient Per Unit Price uses <strong>full kamas</strong>: 77 = 77 kamas.</p>
@@ -16,6 +16,7 @@
   {% endif %}
 
   <form id="recipe-calculator-form" method="post" action="/recipe-calculator" class="calculator-form">
+      <input type="hidden" name="world" value="{{ world.key }}">
     <section class="collapsible-section calculator-picker" aria-labelledby="calculator-picker-heading">
       <h2 id="calculator-picker-heading">Select Craftable Items</h2>
       <label for="calculator-search">Find a craftable item</label>
@@ -183,6 +184,7 @@
                         class="price-edit-form calculator-ingredient-price-form"
                         data-item-uuid="{{ ingredient.item_uuid }}"
                       >
+      <input type="hidden" name="world" value="{{ world.key }}">
                         <input type="hidden" name="price_unit" value="kamas">
                         <label class="visually-hidden" for="calculator-ingredient-price-{{ ingredient.crafted_item_uuid }}-{{ ingredient.item_uuid }}">
                           Current Unit Price for {{ ingredient.display_name }}
@@ -221,6 +223,7 @@
       <details class="calculator-selected-items" open>
         <summary>Selected craft breakdown</summary>
         <form method="post" action="/recipe-calculator/sales" class="calculator-sales-form">
+      <input type="hidden" name="world" value="{{ world.key }}">
           <input type="hidden" name="price_unit" value="thousands">
           <p class="calculator-sale-help">
             Check the crafts you want to list. Each craft quantity becomes that many

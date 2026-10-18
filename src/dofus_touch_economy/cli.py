@@ -414,5 +414,69 @@ def _is_loopback(host: str) -> bool:
         return False
 
 
+def sync_pc_main(argv: Sequence[str] | None = None) -> int:
+    from dataclasses import asdict
+
+    from alembic import command
+    from alembic.config import Config
+
+    from dofus_touch_economy.dofus_sync import (
+        cache_dofus_icons,
+        download_release,
+        seed_touch_benchmarks,
+        sync_dofus_release,
+    )
+    from dofus_touch_economy.worlds import WORLDS, validate_world_paths, world_settings
+
+    parser = argparse.ArgumentParser(
+        description="Initialize/update the Dofus Tal Kasha catalog and recipes"
+    )
+    parser.add_argument(
+        "--source-directory", type=Path, help="Use an already downloaded, pinned release"
+    )
+    parser.add_argument(
+        "--benchmark-touch",
+        action="store_true",
+        help="Seed unpriced exact item matches from Blair, labeled as benchmarks",
+    )
+    parser.add_argument("--skip-icons", action="store_true")
+    arguments = parser.parse_args(argv)
+    base_settings = Settings.from_env()
+    validate_world_paths(base_settings)
+    settings = world_settings(base_settings, WORLDS[1])
+    source_directory = arguments.source_directory or download_release(
+        settings.project_root / "data" / "raw" / "dofus_pc"
+    )
+    engine = create_engine_for_url(settings.database_url)
+    try:
+        config = Config(str(settings.project_root / "alembic.ini"))
+        config.set_main_option("script_location", str(settings.project_root / "migrations"))
+        with engine.begin() as connection:
+            config.attributes["connection"] = connection
+            command.upgrade(config, "head")
+        factory = create_session_factory(engine)
+        summary = sync_dofus_release(factory, source_directory)
+        print(json.dumps(asdict(summary), sort_keys=True))
+        if not arguments.skip_icons:
+            cached, missing = cache_dofus_icons(
+                factory, source_directory, settings.project_root / "data" / "app" / "item_icons"
+            )
+            print(f"dofus_icons_cached={cached} missing_icons={missing}")
+        if arguments.benchmark_touch:
+            if not base_settings.database_path.is_file():
+                parser.error("Blair database does not exist; no benchmarks were seeded")
+            touch_engine = create_engine_for_url(base_settings.database_url)
+            try:
+                count = seed_touch_benchmarks(
+                    create_session_factory(touch_engine), factory, base_settings.market_context
+                )
+                print(f"touch_blair_benchmarks={count}")
+            finally:
+                touch_engine.dispose()
+    finally:
+        engine.dispose()
+    return 0
+
+
 if __name__ == "__main__":
     raise SystemExit(import_main())

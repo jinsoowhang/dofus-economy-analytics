@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{% if detail %}{{ detail.display_name }}{% else %}Item Not Found{% endif %} · Dofus Touch Economy{% endblock %}
+{% block title %}{% if detail %}{{ detail.display_name }}{% else %}Item Not Found{% endif %} · Dofus Economy{% endblock %}
 {% block content %}
   {% if error %}
     <h1>{{ error }}</h1>
@@ -14,7 +14,7 @@
     </h1>
     <p class="page-description">Review this item's current price, sales activity, and crafting economics.</p>
     <p>
-      {{ (detail.category or "Uncategorized") | title }} · Market: {{ detail.market_context }} ·
+      {{ (detail.category or "Uncategorized") | title }} · Market: {{ world.server }} ·
       Weight: {{ "{:,} pods".format(detail.weight) if detail.weight is not none else "Unknown" }} ·
       Catalog Source: {{ "Manual" if detail.created_source == "manual" else "Import" }}
     </p>
@@ -38,8 +38,11 @@
           </h2>
         </summary>
         <p class="filter-help">
-          Standard profession requirement based on this recipe's
+          {% if world.game == 'dofus' %}
+          Dofus profession requirement from this recipe's result level in the imported client data.
+          {% else %}Standard profession requirement based on this recipe's
           {{ detail.recipe.ingredients | length }} ingredient {{ "slot" if detail.recipe.ingredients | length == 1 else "slots" }}.
+          {% endif %}
         </p>
         <div class="recipe-quantity-preview item-recipe-controls">
           <div class="recipe-quantity-field">
@@ -128,6 +131,7 @@
                     action="/items/{{ detail.uuid }}/recipe-ingredients/{{ ingredient.item_uuid }}/price"
                     class="price-edit-form recipe-price-edit-form"
                   >
+      <input type="hidden" name="world" value="{{ world.key }}">
                     <input type="hidden" name="price_unit" value="kamas">
                     <label class="visually-hidden" for="recipe-price-{{ ingredient.item_uuid }}">
                       Per Unit Price for {{ ingredient.display_name }}

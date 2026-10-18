@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from decimal import Decimal
@@ -5,14 +6,14 @@ from fractions import Fraction
 from typing import Literal
 from uuid import UUID
 
-from sqlalchemy import func, select
-from sqlalchemy.orm import Session, aliased, selectinload
+from sqlalchemy import and_, func, or_, select
+from sqlalchemy.orm import Session, aliased, joinedload, selectinload
 
 from dofus_touch_economy.catalog_scope import (
     TOUCH_CATALOG_EXCLUDED,
     active_catalog_item_clause,
 )
-from dofus_touch_economy.models import Item, Recipe, RecipeIngredient, SaleListing
+from dofus_touch_economy.models import Item, Recipe, RecipeIngredient, SaleListing, SourceRecord
 from dofus_touch_economy.normalization import format_item_display_name, normalize_item_name
 from dofus_touch_economy.services.pricing import (
     IngredientPrice,
@@ -43,6 +44,18 @@ def required_profession_level(ingredient_count: int) -> int | None:
     if not 1 <= ingredient_count <= 8:
         return None
     return _PROFESSION_LEVEL_BY_INGREDIENT_COUNT[ingredient_count]
+
+
+def recipe_profession_level(recipe) -> int | None:
+    payload = (
+        recipe.source_payload
+        if isinstance(recipe, _CatalogRecipe)
+        else recipe.source_record.raw_payload_json
+    )
+    source_level = json.loads(payload).get("requiredProfessionLevel")
+    if source_level is not None:
+        return source_level if type(source_level) is int and 1 <= source_level <= 200 else None
+    return required_profession_level(len(recipe.ingredients))
 
 
 def default_recipe_calculator_quantity(recipe_cost: Decimal | None) -> int:
@@ -291,6 +304,7 @@ class _CatalogRecipe:
     icon_source_url: str | None
     profession: str
     ingredients: list[tuple[int | None, str, int]]
+    source_payload: str
 
 
 class RecipeCatalogService:
@@ -449,7 +463,7 @@ class RecipeCatalogService:
                         else f"/item-icons/{recipe.item_uuid}.png"
                     ),
                     profession=recipe.profession,
-                    profession_level=required_profession_level(len(recipe.ingredients)),
+                    profession_level=recipe_profession_level(recipe),
                     signal=signal,
                     current_price=crafted_item_price.current.unit_price,
                     recipe_cost=current_metrics.recipe_cost,
@@ -591,7 +605,7 @@ class RecipeCatalogService:
                     item_uuid=recipe.item_uuid,
                     display_name=recipe.display_name,
                     profession=recipe.profession,
-                    profession_level=required_profession_level(len(recipe.ingredients)),
+                    profession_level=recipe_profession_level(recipe),
                     completed_sale_count=completed_sale_counts.get(
                         recipe.crafted_item_id,
                         0,
@@ -807,7 +821,7 @@ class RecipeCatalogService:
                         else f"/item-icons/{recipe.item_uuid}.png"
                     ),
                     profession=recipe.profession,
-                    profession_level=required_profession_level(len(recipe.ingredients)),
+                    profession_level=recipe_profession_level(recipe),
                     active_listing_count=active_listing_counts.get(
                         recipe.crafted_item_id,
                         0,
@@ -873,7 +887,7 @@ class RecipeCalculatorService:
                         else f"/item-icons/{recipe.item_uuid}.png"
                     ),
                     profession=recipe.profession,
-                    profession_level=required_profession_level(len(recipe.ingredients)),
+                    profession_level=recipe_profession_level(recipe),
                     recipe_cost=recipe_cost,
                     default_craft_quantity=default_recipe_calculator_quantity(recipe_cost),
                     sale_price=(
@@ -980,7 +994,7 @@ class RecipeCalculatorService:
                     else f"/item-icons/{recipe.item_uuid}.png"
                 ),
                 profession=recipe.profession,
-                profession_level=required_profession_level(len(recipe.ingredients)),
+                profession_level=recipe_profession_level(recipe),
                 shared_ingredient_count=shared_ingredient_count,
                 ingredient_count=ingredient_count,
                 overlap_percent=(shared_ingredient_count * 100 + ingredient_count // 2)
@@ -1062,7 +1076,7 @@ class RecipeCalculatorService:
                     icon_url=_icon_url(recipe.crafted_item),
                     profession=recipe.profession,
                     category=recipe.crafted_item.category,
-                    profession_level=required_profession_level(len(recipe.ingredients)),
+                    profession_level=recipe_profession_level(recipe),
                     craft_quantity=craft_quantity,
                     recipe_unit_cost=recipe_metrics.recipe_cost,
                     total_recipe_cost=(
@@ -1235,6 +1249,7 @@ def _latest_recipe_catalog(
             Recipe.uuid.label("recipe_uuid"),
             Recipe.crafted_item_id,
             Recipe.profession,
+            SourceRecord.raw_payload_json.label("source_payload"),
             crafted_item.uuid.label("item_uuid"),
             crafted_item.display_name,
             crafted_item.category,
@@ -1245,6 +1260,7 @@ def _latest_recipe_catalog(
             RecipeIngredient.quantity.label("ingredient_quantity"),
         )
         .join(latest_recipe_ids, latest_recipe_ids.c.recipe_id == Recipe.id)
+        .join(SourceRecord, SourceRecord.id == Recipe.source_record_id)
         .join(crafted_item, crafted_item.id == Recipe.crafted_item_id)
         .outerjoin(RecipeIngredient, RecipeIngredient.recipe_id == Recipe.id)
         .where(active_catalog_item_clause(crafted_item), ~excluded_ingredient)
@@ -1265,7 +1281,13 @@ def _latest_recipe_catalog(
         allowed_counts = [
             count for count in range(1, 9) if required_profession_level(count) <= maximum_level
         ]
-        statement = statement.where(ingredient_count.in_(allowed_counts))
+        source_level = func.json_extract(SourceRecord.raw_payload_json, "$.requiredProfessionLevel")
+        statement = statement.where(
+            or_(
+                and_(source_level.is_not(None), source_level <= maximum_level),
+                and_(source_level.is_(None), ingredient_count.in_(allowed_counts)),
+            )
+        )
     rows = session.execute(statement)
     recipes_by_id: dict[int, _CatalogRecipe] = {}
     for row in rows:
@@ -1280,6 +1302,7 @@ def _latest_recipe_catalog(
                 icon_source_url=row.icon_source_url,
                 profession=row.profession,
                 ingredients=[],
+                source_payload=row.source_payload,
             )
             recipes_by_id[row.recipe_id] = recipe
         if row.ingredient_id is not None:
@@ -1318,6 +1341,7 @@ def _latest_recipes_for_items(session: Session, item_uuids: tuple[UUID, ...]) ->
                 ~_excluded_recipe_ingredient_exists(),
             )
             .options(
+                joinedload(Recipe.source_record),
                 selectinload(Recipe.crafted_item),
                 selectinload(Recipe.ingredients).selectinload(RecipeIngredient.item),
             )

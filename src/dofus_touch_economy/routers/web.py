@@ -8,7 +8,7 @@ from urllib.parse import urlencode
 from uuid import UUID
 from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
@@ -70,16 +70,19 @@ from dofus_touch_economy.services.sales import (
     SalesService,
 )
 from dofus_touch_economy.web_prices import price_command_values, price_thousands
+from dofus_touch_economy.worlds import WORLDS
 
 router = APIRouter()
-templates = Jinja2Templates(directory=Path(__file__).resolve().parents[1] / "templates")
+templates = Jinja2Templates(
+    directory=Path(__file__).resolve().parents[1] / "templates",
+    context_processors=[lambda request: {"worlds": WORLDS, "world": request.state.world}],
+)
 PACIFIC_TIME = ZoneInfo("America/Los_Angeles")
 SALES_PAGE_SIZE = 50
 SALE_ITEM_CHOICE_LIMIT = 25
 ITEM_PAGE_SIZE = 100
 RECIPE_PAGE_SIZE = 100
 PRICE_PRIORITY_LIMIT = 100
-DEFAULT_PROFIT_OPPORTUNITY_PROFESSIONS = ("Shoemaker", "Jeweller", "Tailor")
 DEFAULT_OPPORTUNITY_MAX_LEVEL = 60
 
 
@@ -1405,6 +1408,7 @@ def todays_crafting_items_page(
     session: Annotated[Session, Depends(get_session)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> HTMLResponse:
+    default_professions = request.state.world.crafting_professions
     return templates.TemplateResponse(
         request,
         "todays_crafting_items.html",
@@ -1413,10 +1417,10 @@ def todays_crafting_items_page(
             "crafting_items": RecipeCatalogService(
                 session, settings.market_context
             ).daily_crafting_items(
-                professions=DEFAULT_PROFIT_OPPORTUNITY_PROFESSIONS,
+                professions=default_professions,
                 maximum_level=DEFAULT_OPPORTUNITY_MAX_LEVEL,
             ),
-            "crafting_professions": DEFAULT_PROFIT_OPPORTUNITY_PROFESSIONS,
+            "crafting_professions": default_professions,
             "crafting_maximum_level": DEFAULT_OPPORTUNITY_MAX_LEVEL,
         },
         headers={"Cache-Control": "no-store"},
@@ -2183,13 +2187,16 @@ def profit_opportunities_page(
     availability_filter: Annotated[bool, Query()] = False,
     profession: Annotated[list[str] | None, Query()] = None,
     profession_filter: Annotated[bool, Query()] = False,
-    max_level: Annotated[int, Query(ge=1, le=100)] = DEFAULT_OPPORTUNITY_MAX_LEVEL,
+    max_level: Annotated[int, Query(ge=1, le=200)] = DEFAULT_OPPORTUNITY_MAX_LEVEL,
 ) -> HTMLResponse:
+    default_professions = request.state.world.crafting_professions
+    if request.state.world.game == "touch" and max_level > 100:
+        raise HTTPException(422, "Dofus Touch profession level must not exceed 100")
     if not_currently_selling is None:
         not_currently_selling = not availability_filter
     selected_professions = _normalized_filter_values(profession)
     if profession is None and not profession_filter:
-        selected_professions = DEFAULT_PROFIT_OPPORTUNITY_PROFESSIONS
+        selected_professions = default_professions
     report = RecipeCatalogService(
         session,
         settings.market_context,
@@ -2210,7 +2217,7 @@ def profit_opportunities_page(
             "profession_choices": sorted(
                 {
                     *report.professions,
-                    *DEFAULT_PROFIT_OPPORTUNITY_PROFESSIONS,
+                    *default_professions,
                     *selected_professions,
                 },
                 key=str.casefold,

@@ -166,12 +166,12 @@ class CurrentPriceResponse(BaseModel):
     observed_at: datetime
     recorded_at: datetime
     market_context: str
+    source: str = "manual"
 
 
 class PriceObservationResponse(CurrentPriceResponse):
     item_uuid: UUID
     note: str | None
-    source: str
     invalidated_at: datetime | None
     invalidation_reason: str | None
 

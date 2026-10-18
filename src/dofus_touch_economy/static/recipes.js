@@ -92,7 +92,7 @@ if (
   renderTrack();
 }
 
-const recipeScrollStorageKey = "dofus-recipes-scroll-position";
+const recipeScrollStorageKey = window.economyStorageKey("dofus-recipes-scroll-position");
 
 window.addEventListener("load", () => {
   let savedScrollPosition = null;

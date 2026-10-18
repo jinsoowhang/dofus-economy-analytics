@@ -30,13 +30,13 @@ const calculatorCraftProjectedSales = document.querySelector(
 const calculatorCraftEstimatedProfit = document.querySelector(
   "#calculator-craft-estimated-profit",
 );
-const recipeCartStorageKey = "dofus-recipe-calculator-cart-v1";
-const recipeSelectionStorageKey = "dofus-recipe-calculator-selection-v1";
+const recipeCartStorageKey = window.economyStorageKey("dofus-recipe-calculator-cart-v1");
+const recipeSelectionStorageKey = window.economyStorageKey("dofus-recipe-calculator-selection-v1");
 const recipeCalculatorPendingSalesStorageKey =
-  "dofus-recipe-calculator-pending-sales-v1";
-const recipeCalculatorScrollStorageKey = "dofus-recipe-calculator-scroll-position";
+  window.economyStorageKey("dofus-recipe-calculator-pending-sales-v1");
+const recipeCalculatorScrollStorageKey = window.economyStorageKey("dofus-recipe-calculator-scroll-position");
 const recipeCalculatorShoppingListSortStorageKey =
-  "dofus-recipe-calculator-shopping-list-sort-v3";
+  window.economyStorageKey("dofus-recipe-calculator-shopping-list-sort-v3");
 const calculatorKamaFormatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 20,
 });

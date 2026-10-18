@@ -34,7 +34,7 @@ from dofus_touch_economy.services.pricing import (
     calculate_recipe_metrics,
     price_freshness,
 )
-from dofus_touch_economy.services.recipes import required_profession_level
+from dofus_touch_economy.services.recipes import recipe_profession_level
 
 ItemSortField = Literal["name", "category", "weight", "price", "observed"]
 SortDirection = Literal["asc", "desc"]
@@ -188,6 +188,12 @@ class CatalogService:
         if category_was_supplied:
             exact = self._catalog.find_by_identity(normalized_name, identity_category)
             candidates = [] if exact is None else [exact]
+            candidates.extend(
+                item
+                for item in self._catalog.find_by_normalized_name(normalized_name)
+                if item.identity_category.startswith("dofus:")
+                and normalize_item_name(item.category or "") == identity_category
+            )
         else:
             candidates = self._catalog.find_by_normalized_name(normalized_name)
         return [_item_summary(item) for item in candidates]
@@ -263,7 +269,7 @@ class CatalogService:
             recipe_response = RecipeResponse(
                 uuid=recipe.uuid,
                 profession=recipe.profession,
-                profession_level=required_profession_level(len(recipe.ingredients)),
+                profession_level=recipe_profession_level(recipe),
                 ingredients=ingredient_responses,
             )
             metrics_response = RecipeMetricsResponse(

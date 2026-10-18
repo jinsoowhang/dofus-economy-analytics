@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Profit Opportunities · Dofus Touch Economy{% endblock %}
+{% block title %}Profit Opportunities · Dofus Economy{% endblock %}
 {% block content %}
   <h1>Profit Opportunities</h1>
   <p class="page-description">
@@ -8,6 +8,7 @@
   </p>
 
   <form method="get" action="/profit-opportunities" class="opportunity-filter-form">
+      <input type="hidden" name="world" value="{{ world.key }}">
     <input type="hidden" name="profession_filter" value="true">
     <input type="hidden" name="availability_filter" value="true">
     <details class="filter-multiselect">
@@ -27,7 +28,7 @@
         type="number"
         inputmode="numeric"
         min="1"
-        max="100"
+        max="{{ 200 if world.game == 'dofus' else 100 }}"
         value="{{ maximum_profession_level }}"
         aria-label="Maximum profession level"
       >

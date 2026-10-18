@@ -1,7 +1,7 @@
 "use strict";
 
-const recipeCartStorageKey = "dofus-recipe-calculator-cart-v1";
-const recipeSelectionStorageKey = "dofus-recipe-calculator-selection-v1";
+const recipeCartStorageKey = window.economyStorageKey("dofus-recipe-calculator-cart-v1");
+const recipeSelectionStorageKey = window.economyStorageKey("dofus-recipe-calculator-selection-v1");
 const recipeCartButtons = Array.from(document.querySelectorAll(".recipe-cart-add"));
 const recipeCartCount = document.querySelector("#recipe-cart-count");
 const recipeOpenCalculator = document.querySelector("#recipe-open-calculator");

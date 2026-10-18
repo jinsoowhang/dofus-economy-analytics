@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Recipes · Dofus Touch Economy{% endblock %}
+{% block title %}Recipes · Dofus Economy{% endblock %}
 {% block content %}
   <h1>Recipes</h1>
   <p class="price-entry-help">Enter prices in <strong>thousands of kamas</strong>: <strong>77 = 77,000 kamas</strong>; 0.5 = 500 kamas. Totals and history show full kamas.</p>
   <p class="page-description">Filter craftable items, compare recipe economics, and add your choices to the Recipe Calculator.</p>
-  <p>Market: {{ market_context }}</p>
+  <p>Market: {{ world.server }}</p>
   {% if notification %}
     <p class="notification" role="status">{{ notification }}</p>
   {% endif %}
@@ -28,6 +28,7 @@
       </span>
     </summary>
     <form method="get" action="/recipes" class="recipe-filter-form">
+      <input type="hidden" name="world" value="{{ world.key }}">
       <input type="hidden" name="sort" value="{{ sort_field }}">
       <input type="hidden" name="direction" value="{{ sort_direction }}">
       <label>
@@ -207,6 +208,7 @@
                     action="/recipes/{{ recipe.item_uuid }}/price?{{ recipe_view_query }}"
                     class="price-edit-form recipe-current-price-form"
                   >
+      <input type="hidden" name="world" value="{{ world.key }}">
                     <input type="hidden" name="price_unit" value="thousands">
                     <label class="visually-hidden" for="recipe-current-price-{{ recipe.item_uuid }}">
                       Current Price for {{ recipe.display_name }}

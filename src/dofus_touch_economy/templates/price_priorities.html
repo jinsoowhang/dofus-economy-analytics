@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Price Priorities · Dofus Touch Economy{% endblock %}
+{% block title %}Price Priorities · Dofus Economy{% endblock %}
 {% block content %}
   <h1>Price Priorities</h1>
   <p class="price-entry-help">Current Price uses <strong>full kamas</strong>: <strong>77 = 77 kamas</strong>.</p>
@@ -8,7 +8,7 @@
     that immediately complete the most recipes come first; completed sales and total recipe
     reach break ties.
   </p>
-  <p>Market: {{ market_context }}</p>
+  <p>Market: {{ world.server }}</p>
   {% if notification %}
     <p class="notification" role="status">{{ notification }}</p>
   {% endif %}
@@ -103,6 +103,7 @@
                     action="/price-priorities/{{ item.item_uuid }}/price"
                     class="price-edit-form catalog-current-price-form"
                   >
+      <input type="hidden" name="world" value="{{ world.key }}">
                     <input type="hidden" name="price_unit" value="kamas">
                     <label class="visually-hidden" for="priority-current-price-{{ item.item_uuid }}">
                       Current price for {{ item.display_name }}

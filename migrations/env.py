@@ -29,6 +29,14 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
+    supplied_connection = config.attributes.get("connection")
+    if supplied_connection is not None:
+        context.configure(
+            connection=supplied_connection, target_metadata=target_metadata, compare_type=True
+        )
+        with context.begin_transaction():
+            context.run_migrations()
+        return
     engine = create_engine_for_url(Settings.from_env().database_url)
     try:
         with engine.connect() as connection:

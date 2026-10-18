@@ -15,6 +15,7 @@ def test_documented_entry_points_exist() -> None:
         "dofus-slack-worker": "dofus_touch_economy.cli:slack_worker_main",
         "dofus-sync-catalog": "dofus_touch_economy.cli:sync_catalog_main",
         "dofus-sync-recipes": "dofus_touch_economy.cli:sync_recipes_main",
+        "dofus-sync-pc": "dofus_touch_economy.cli:sync_pc_main",
         "dofus-web": "dofus_touch_economy.cli:web_main",
     }
 

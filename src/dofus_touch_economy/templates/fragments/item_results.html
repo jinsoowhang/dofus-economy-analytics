@@ -72,6 +72,7 @@
               action="/items/{{ item.uuid }}/search-price?{{ item_view_query }}"
               class="price-edit-form catalog-current-price-form"
             >
+      <input type="hidden" name="world" value="{{ world.key }}">
               <input type="hidden" name="price_unit" value="{{ 'thousands' if price_in_thousands else 'kamas' }}">
               <label class="visually-hidden" for="item-current-price-{{ item.uuid }}">
                 Current price for {{ item.display_name }}
@@ -151,6 +152,7 @@
       category; you can override it when needed.
     </p>
     <form method="post" action="/items" class="add-item-form">
+      <input type="hidden" name="world" value="{{ world.key }}">
       <label for="new-item-name">Item Name</label>
       <input
         id="new-item-name"

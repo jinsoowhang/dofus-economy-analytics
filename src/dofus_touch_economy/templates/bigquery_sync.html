@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}BigQuery Sync · Dofus Touch Economy{% endblock %}
+{% block title %}BigQuery Sync · Dofus Economy{% endblock %}
 {% block content %}
   <h1>BigQuery Sync</h1>
   <p class="page-description">
@@ -28,6 +28,7 @@
       class="sync-run-form"
       onsubmit="return window.confirm('Publish the current SQLite snapshot to the configured BigQuery datasets?')"
     >
+      <input type="hidden" name="world" value="{{ world.key }}">
       <button id="sync-run-button" type="submit" {% if sync.status == "running" %}disabled{% endif %}>
         {% if sync.status == "running" %}Sync in progress…{% else %}Update BigQuery Now{% endif %}
       </button>

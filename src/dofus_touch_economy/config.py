@@ -18,6 +18,7 @@ class Settings:
     bigquery_location: str = "US"
     bigquery_datasets: tuple[str, ...] = ("dofus_dev", "dofus_prod")
     public_origin: str | None = None
+    dofus_database_path: Path | None = None
 
     def __post_init__(self) -> None:
         if self.public_origin is None:
@@ -94,4 +95,9 @@ class Settings:
             bigquery_location=bigquery_location,
             bigquery_datasets=bigquery_datasets,
             public_origin=os.environ.get("DOFUS_PUBLIC_ORIGIN", "").strip() or None,
+            dofus_database_path=(
+                (project_root / Path(os.environ["DOFUS_PC_DATABASE_PATH"])).resolve()
+                if os.environ.get("DOFUS_PC_DATABASE_PATH", "").strip()
+                else None
+            ),
         )

@@ -3,16 +3,17 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Dofus Touch Economy{% endblock %}</title>
-    <link rel="stylesheet" href="/static/app.css?v=20261012-crafting-task">
+    <title>{% block title %}Dofus Economy{% endblock %} · {{ world.game_label }} · {{ world.server }}</title>
+    <link rel="stylesheet" href="/static/app.css?v=20261017-worlds">
     <script src="/static/htmx.min.js" defer></script>
+    <script src="/static/world-selection.js?v=20261017" defer></script>
     <script src="/static/table-sort.js?v=20260909-recipe-order" defer></script>
     <script src="/static/site-navigation.js" defer></script>
   </head>
-  <body>
+  <body data-world="{{ world.key }}">
     <header class="site-header">
       <div class="site-header-inner">
-        <a href="/" class="site-brand">Dofus Touch Economy</a>
+        <a href="/" class="site-brand">Dofus Economy</a>
         <nav class="site-tabs" aria-label="Primary navigation">
           <a href="/" class="site-tab{% if active_tab == 'home' %} is-active{% endif %}"{% if active_tab == 'home' %} aria-current="page"{% endif %}>Home</a>
           <details class="site-menu">
@@ -101,9 +102,30 @@
             <a href="/oauth2/sign_out" class="site-tab">Sign out</a>
           {% endif %}
         </nav>
+        <form method="get" action="/select-world" class="world-selector" aria-label="Game and server">
+          <label for="world-game">Game</label>
+          <select id="world-game" name="game">
+            <option value="touch" {% if world.game == 'touch' %}selected{% endif %}>Dofus Touch</option>
+            <option value="dofus" {% if world.game == 'dofus' %}selected{% endif %}>Dofus</option>
+          </select>
+          <label for="world-server">Server</label>
+          <select id="world-server" name="server">
+            {% for option in worlds %}
+              <option value="{{ option.key }}" data-game="{{ option.game }}" {% if world.key == option.key %}selected{% endif %}>{{ option.server }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit">Switch</button>
+        </form>
       </div>
     </header>
     <main class="page-shell{% if active_tab in ['price_priorities', 'price_review', 'recipes', 'recipe_calculator', 'profit_opportunities', 'best_sellers', 'out_of_stock', 'daily_crafting', 'insights', 'dashboard'] %} page-shell--wide{% endif %}">
+      {% if world.game == 'dofus' %}
+        <aside class="world-benchmark-notice" role="note">
+          <strong>Dofus · Tal Kasha</strong> — Starting prices may include matched Blair (Dofus Touch)
+          benchmarks, not observed Tal Kasha prices. Estimates, profit, and recommendations may use
+          these benchmarks until you enter your own prices. Unmatched items have no starting price.
+        </aside>
+      {% endif %}
       {% block content %}{% endblock %}
     </main>
     {% block scripts %}{% endblock %}
