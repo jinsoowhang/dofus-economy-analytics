@@ -5,6 +5,66 @@
 ## Dofus Touch Economy Analytics
 
 - Public identity: analytics engineering for player-observed Dofus Touch item prices, crafting economics, sales behavior.
+- VPS deployment preparation uses the existing Nginx Proxy Manager and a Docker
+  Google OAuth2 Proxy gateway with an explicit private email allowlist. The app
+  and gateway publish no ports; the gateway and separate public information service
+  join the existing proxy network, while the app stays on its backend network.
+  `DOFUS_PUBLIC_ORIGIN` enables exact HTTPS Origin/Referer checks for every write;
+  the local `dofus-web` command remains loopback-only. All allowed accounts share
+  the same database; user-separated data and permissions remain out of scope.
+- Runtime state belongs outside the VPS checkout, with app UID 10001 and login
+  proxy UID 65532. OAuth secrets and allowed email addresses remain private files
+  mounted only into the gateway. Docker build inputs exclude operational data and
+  secrets. The public-file policy also rejects deployment secrets and private keys;
+  GitHub CI scans complete Git history with pinned Gitleaks.
+- October 11 preparation passed the full local check (478 Python tests and 126 dbt
+  build/test nodes), Git history/proposed-file secret scans, and isolated synthetic
+  VPS container checks for migration, private networking, login redirects, cookie
+  attributes, API and asset protection, forged credentials, origin denial, database
+  integrity, and restart persistence. The actual Gmail callback and owner/other-user
+  authorization still require real OAuth credentials and live testing.
+- Live hosting/cutover remains pending the selected hostname, owner Gmail address,
+  and Google OAuth Web client configuration. No live database was transferred, no
+  existing site was changed, and test containers/networks were removed. At cutover,
+  choose the VPS as the single authoritative writer, stop local writers, transfer
+  an integrity-checked online SQLite backup and separate icon cache, and resolve
+  how local screenshot reconciliation and the optional Slack worker will access
+  authoritative state. See `docs/vps-deployment.md`; private preparation reports
+  stay under `data/reports/vps-preparation-2026-10-11/`.
+- The user subsequently visited the proposed hostname and received NPM's default
+  congratulations page. Read-only VPS inspection confirmed no deployed Dofus
+  containers or production directories. This is pending deployment/routing, not an
+  application error. Requested the owner Gmail and private OAuth Web-client file
+  path; complete authenticated deployment before exposing operational state.
+- The owner provided their Gmail address, saved only in ignored local configuration
+  and the root-protected VPS secrets directory. The VPS now has an owner-only
+  allowlist and a generated 32-byte session secret; live containers/routing/state
+  remain pending. An existing local Google OAuth credential was inspected for type
+  only and is a Desktop/installed client; it was not copied or used. A Web client
+  with the selected hostname's exact `/oauth2/callback` URI is still required.
+- Google branding required homepage/privacy links in the owner's actual console.
+  Use the console's required fields rather than assuming Testing permits blanks.
+  Public `/about`, `/privacy`, and `/public.css` pages now use a separate nonroot,
+  read-only static container with no app network, database, or credentials. Exact
+  NPM locations keep those pages public after the main upstream switches to login.
+  The initial hostname points to the static service, so `/` shows information and
+  operational routes return 404 until authenticated deployment is complete.
+- Public information pages are deployed independently of SQLite cutover and OAuth
+  credentials. NPM has a managed host, valid Let's Encrypt certificate, and Force
+  SSL; the existing proxy-host records were preserved. Public HTTPS checks with a
+  normal browser user agent pass through Cloudflare. Cloudflare's existing browser
+  integrity check rejects default Python user agents with 1010; it was not changed.
+  Public page files contain no personal email, server address, credential, or
+  operational record. The policy refers privacy requests to the support address
+  displayed by Google. Hosting/runtime details stay in private preparation reports.
+- Session stopped at the owner's request before the next usage-limit reset. The
+  VPS serves public branding pages only; local SQLite remains the authoritative
+  writer, and the owner will continue recording sales locally. Do not use any
+  earlier snapshot for eventual cutover: stop local writers and take a fresh
+  integrity-checked online backup after OAuth/HTTPS access is ready. Resume with
+  the Google OAuth Web-client file, complete owner-only login, then transfer the
+  latest database and icons. Source was uncommitted at that stopping checkpoint;
+  October 17 publication preserves the pending hosting/cutover state.
 - The public README presents the current system as a local-first economy tracker and
   hosted analytics project. It states explicitly that FastAPI writes to SQLite and
   that BigQuery snapshots plus dbt builds are manual, separate publication steps.

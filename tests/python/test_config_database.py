@@ -18,6 +18,7 @@ def test_settings_defaults_are_deterministic(
     monkeypatch.delenv("DOFUS_BIGQUERY_PROJECT_ID", raising=False)
     monkeypatch.delenv("DOFUS_BIGQUERY_LOCATION", raising=False)
     monkeypatch.delenv("DOFUS_BIGQUERY_DATASETS", raising=False)
+    monkeypatch.delenv("DOFUS_PUBLIC_ORIGIN", raising=False)
 
     settings = Settings.from_env()
 
@@ -31,6 +32,7 @@ def test_settings_defaults_are_deterministic(
     assert settings.bigquery_project_id == "claude-projects-489306"
     assert settings.bigquery_location == "US"
     assert settings.bigquery_datasets == ("dofus_dev", "dofus_prod")
+    assert settings.public_origin is None
 
 
 def test_database_paths_resolve_relative_to_project_root(

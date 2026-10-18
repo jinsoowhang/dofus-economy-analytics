@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="How Dofus Touch Economy uses Google sign-in, session cookies, and private operational data.">
+    <title>Privacy policy — Dofus Touch Economy</title>
+    <link rel="stylesheet" href="/public.css">
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow"><a href="/about">Dofus Touch Economy</a></p>
+      <h1>Privacy policy</h1>
+      <p class="intro">Dofus Touch Economy is a private, owner-operated tracker for observed item prices, recipes, crafting economics, and sales activity.</p>
+      <p>Last updated: October 11, 2026.</p>
+      <section aria-labelledby="google">
+        <h2 id="google">Google sign-in information</h2>
+        <p>Google handles account sign-in. The authentication gateway requests the <code>openid</code>, <code>email</code>, and <code>profile</code> scopes. Google may provide an account identifier, verified email address, name, and profile picture. This information is used to verify identity, maintain an authenticated session, and check whether the account is on the private access allowlist.</p>
+        <p>The application does not request access to Gmail messages, contacts, Google Drive files, or calendars. Google passwords are entered on Google's sign-in service and are not collected by this application.</p>
+      </section>
+      <section aria-labelledby="storage">
+        <h2 id="storage">Sessions and storage</h2>
+        <p>The authentication gateway stores an encrypted, signed session in a secure browser cookie. The session may contain Google tokens needed to validate and refresh sign-in. The configured session expires after 12 hours and may refresh while in use. Authentication tokens are not forwarded to the economy application or stored in its catalog, pricing, or sales tables.</p>
+        <p>Approved email addresses and authentication credentials are stored in private server configuration. Browser-local storage also remembers tracker preferences, recipe selections, and checklist progress. These preferences can be cleared through browser settings.</p>
+      </section>
+      <section aria-labelledby="records">
+        <h2 id="records">Operational records and service diagnostics</h2>
+        <p>Prices, recipes, listings, and sales entered into the tracker are stored in its private operational database. When the operator explicitly runs an analytics publication, normalized operational snapshots are sent to the configured BigQuery service. Google sign-in sessions and authentication credentials are excluded from those snapshots.</p>
+        <p>Limited service diagnostics may contain technical information such as connection metadata, timestamps, and error details. They support operation and troubleshooting and are subject to log rotation. Diagnostic records and backups remain private.</p>
+      </section>
+      <section aria-labelledby="sharing">
+        <h2 id="sharing">Use and sharing</h2>
+        <p>Google account information is used for authentication and access control. It is not sold, used for advertising, or used to train machine-learning models. The website does not add advertising trackers or third-party analytics scripts.</p>
+        <p>The operator and the infrastructure providers needed to host, secure, authenticate, and back up the service may process the information required for those functions. Google processes sign-in information under its own <a href="https://policies.google.com/privacy">privacy policy</a>. Public source code and synthetic examples do not include private operational records or authentication credentials.</p>
+      </section>
+      <section aria-labelledby="control">
+        <h2 id="control">Your choices and privacy requests</h2>
+        <p>You can sign out, clear browser cookies and local storage, and remove the application's access through your <a href="https://myaccount.google.com/connections">Google account connections</a>. For questions, access removal, or deletion requests, contact the operator using the support email displayed on the Google consent screen for this application.</p>
+        <p>Removing an account from the access allowlist does not automatically erase operational price or sales history. The operator handles deletion requests separately, including any applicable private backups and analytics snapshots. This policy will be updated when the application's data practices change.</p>
+      </section>
+      <footer><a href="/about">About Dofus Touch Economy</a></footer>
+    </main>
+  </body>
+</html>

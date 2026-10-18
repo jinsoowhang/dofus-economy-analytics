@@ -66,8 +66,25 @@ def create_app(
     @application.middleware("http")
     async def enforce_same_origin(request: Request, call_next):
         origin = request.headers.get("origin")
+        if request.method in UNSAFE_METHODS and resolved_settings.public_origin is not None:
+            source = origin if origin is not None else request.headers.get("referer", "")
+            try:
+                parsed_source = urlsplit(source)
+                source_origin = f"{parsed_source.scheme}://{parsed_source.netloc}"
+            except ValueError:
+                source_origin = ""
+            if (
+                source_origin != resolved_settings.public_origin
+                or request.headers.get("sec-fetch-site") == "cross-site"
+            ):
+                return JSONResponse(
+                    status_code=403, content={"detail": "same-origin request required"}
+                )
         if request.method in UNSAFE_METHODS and origin is not None:
-            origin_authority = urlsplit(origin).netloc.casefold()
+            try:
+                origin_authority = urlsplit(origin).netloc.casefold()
+            except ValueError:
+                origin_authority = ""
             request_authority = request.headers.get("host", "").casefold()
             if not origin_authority or origin_authority != request_authority:
                 return JSONResponse(

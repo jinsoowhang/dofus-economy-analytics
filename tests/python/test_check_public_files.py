@@ -10,6 +10,7 @@ def test_allows_public_repository_files() -> None:
     paths = [
         "README.md",
         ".env.example",
+        "deploy/.env.example",
         "data/app/README.md",
         "data/raw/README.md",
         "data/reports/README.md",
@@ -43,6 +44,17 @@ def test_rejects_private_or_generated_files() -> None:
         "logs/dbt.log",
         ".user.yml",
         "target/manifest.json",
+        "deploy/.env.vps",
+        "deploy/app.env",
+        "nested/.secrets/oauth.json",
+        "deploy/allowed_emails",
+        "deploy/google_client_secret",
+        "deploy/cookie_secret",
+        "deploy.local.env",
+        "nested/private.pem",
+        "nested/private.key",
+        "nested/credentials.json",
+        "nested/client_secret_example.json",
     ]
 
     assert find_forbidden_tracked_paths(paths) == sorted(paths)

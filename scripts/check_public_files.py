@@ -18,6 +18,7 @@ FORBIDDEN_PREFIXES = (
 )
 ALLOWED_PATHS = {
     ".env.example",
+    "deploy/.env.example",
     "data/app/README.md",
     "data/raw/README.md",
     "data/reports/README.md",
@@ -39,8 +40,18 @@ FORBIDDEN_SUFFIXES = (
     ".sqlite3-shm",
     ".sqlite3-wal",
     ".xlsx",
+    ".pem",
+    ".key",
+    ".env",
 )
-FORBIDDEN_NAMES = {".user.yml"}
+FORBIDDEN_NAMES = {
+    ".user.yml",
+    "deploy.local.env",
+    "allowed_emails",
+    "google_client_secret",
+    "cookie_secret",
+    "credentials.json",
+}
 
 
 def is_forbidden_tracked_path(path: str) -> bool:
@@ -52,6 +63,10 @@ def is_forbidden_tracked_path(path: str) -> bool:
     policy_path = normalized_path.lower()
     policy_name = path_name.lower()
     if policy_name in FORBIDDEN_NAMES:
+        return True
+    if ".secrets" in PurePosixPath(policy_path).parts:
+        return True
+    if policy_name.startswith("client_secret") and policy_name.endswith(".json"):
         return True
     if policy_name == ".env" or policy_name.startswith(".env."):
         return True

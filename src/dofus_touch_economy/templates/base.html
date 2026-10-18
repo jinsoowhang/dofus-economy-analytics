@@ -91,6 +91,10 @@
               <a href="/insights" class="site-submenu-link{% if active_tab == 'insights' %} is-active{% endif %}"{% if active_tab == 'insights' %} aria-current="page"{% endif %}>Insights</a>
             </div>
           </details>
+          {% if request.app.state.settings.public_origin %}
+            <a href="/privacy" class="site-tab">Privacy</a>
+            <a href="/oauth2/sign_out" class="site-tab">Sign out</a>
+          {% endif %}
         </nav>
       </div>
     </header>

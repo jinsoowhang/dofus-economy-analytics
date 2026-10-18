@@ -49,6 +49,15 @@ data/warehouse/**
 .user.yml
 skill-observations/
 .worktrees/
+deploy.local.env
+*.env
+allowed_emails
+google_client_secret
+cookie_secret
+*.pem
+*.key
+client_secret*.json
+credentials.json
 
 # Editors and operating systems
 .vscode/

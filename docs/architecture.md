@@ -83,6 +83,23 @@ remains disabled until its private layout gate is met.
 
 The local browser interface uses server-rendered Jinja templates and a reviewed, vendored HTMX release. The JSON API under `/api/v1` calls the same services. Trusted hosts, same-origin browser mutations, and a loopback-only launch command define the current single-user security boundary.
 
+The optional [VPS deployment](vps-deployment.md) places Nginx Proxy Manager and
+Google OAuth2 Proxy in front of the same application. An explicit private email
+allowlist authorizes access to every HTML, API, and asset route. Neither service
+publishes an application port, and only the login proxy joins NPM's network.
+Hosted mode configures `DOFUS_PUBLIC_ORIGIN` and requires exact HTTPS Origin or
+Referer validation on writes. Google credentials, the cookie secret, the allowlist,
+and persistent SQLite/icon state stay outside the public checkout and image.
+All allowed accounts share one operational database; multi-tenant permissions
+remain deferred. The VPS becomes the authoritative writer only after cutover.
+
+Exact public branding paths `/about`, `/privacy`, and `/public.css` use a separate
+static container with no application-network membership, database, or credential
+mounts. These pages support Google consent-screen requirements. NPM sends every
+other route to the Google login gateway. The initial public-pages-only deployment
+serves information at `/` and returns 404 for operational paths until authentication
+is configured. Public pages contain no observed operational records.
+
 The shared page layout exposes Home, Item, Sales, and Data as top-level navigation.
 Data contains BigQuery Sync, Dashboard, and Insights. Menus open by click or keyboard and close
 when another menu opens, focus leaves, or Escape is pressed.
@@ -251,7 +268,7 @@ Imported cost values and spreadsheet-derived totals, profit, and ROI remain reco
 
 - `item_sales.csv` ingestion until its dates and grain are deterministic;
 - SQLite-to-DuckDB extraction for local execution against private operational data;
-- public hosting, authentication, authorization, and multi-user behavior;
+- multi-user data separation and per-user permissions;
 - scraping, game-client automation, Slack autonomy, alerts, and external BI dashboards.
 
 ## Hosted analytical pilot

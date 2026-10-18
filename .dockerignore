@@ -1,0 +1,22 @@
+# Allow only application build inputs. Private data never enters the build context.
+**
+!Dockerfile
+!pyproject.toml
+!uv.lock
+!alembic.ini
+!src/
+!src/**
+!migrations/
+!migrations/**
+**/__pycache__/**
+**/*.pyc
+**/.env*
+**/*.env
+**/.secrets/**
+**/*.pem
+**/*.key
+**/*credentials*.json
+**/*client_secret*.json
+**/allowed_emails
+**/google_client_secret
+**/cookie_secret

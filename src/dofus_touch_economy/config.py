@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from sqlalchemy import URL
 
@@ -16,6 +17,25 @@ class Settings:
     bigquery_project_id: str = "claude-projects-489306"
     bigquery_location: str = "US"
     bigquery_datasets: tuple[str, ...] = ("dofus_dev", "dofus_prod")
+    public_origin: str | None = None
+
+    def __post_init__(self) -> None:
+        if self.public_origin is None:
+            return
+        parsed = urlsplit(self.public_origin)
+        if (
+            parsed.scheme != "https"
+            or not parsed.hostname
+            or parsed.username is not None
+            or parsed.password is not None
+            or parsed.path
+            or parsed.query
+            or parsed.fragment
+            or parsed.netloc != parsed.hostname
+        ):
+            raise ValueError("DOFUS_PUBLIC_ORIGIN must be an HTTPS origin without a path or port")
+        if parsed.hostname not in self.allowed_hosts or "*" in self.allowed_hosts:
+            raise ValueError("DOFUS_PUBLIC_ORIGIN requires its exact hostname in allowed hosts")
 
     @property
     def database_url(self) -> URL:
@@ -73,4 +93,5 @@ class Settings:
             bigquery_project_id=bigquery_project_id,
             bigquery_location=bigquery_location,
             bigquery_datasets=bigquery_datasets,
+            public_origin=os.environ.get("DOFUS_PUBLIC_ORIGIN", "").strip() or None,
         )

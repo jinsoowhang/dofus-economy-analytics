@@ -1,0 +1,114 @@
+name: dofus-economy
+
+services:
+  app:
+    build:
+      context: ..
+    restart: unless-stopped
+    init: true
+    environment:
+      DOFUS_PROJECT_ROOT: /app
+      DOFUS_APP_DATABASE_PATH: data/app/dofus_touch.sqlite3
+      DOFUS_MARKET_CONTEXT: ${DOFUS_MARKET_CONTEXT:?Set the market context}
+      DOFUS_ALLOWED_HOSTS: ${DOFUS_DOMAIN:?Set the public hostname}
+      DOFUS_PUBLIC_ORIGIN: https://${DOFUS_DOMAIN:?Set the public hostname}
+    volumes:
+      - ${DOFUS_DATA_PATH:?Set the private state directory}:/app/data/app
+    networks:
+      - backend
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import os, urllib.request; urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:8000/openapi.json', headers={'Host': os.environ['DOFUS_ALLOWED_HOSTS']}), timeout=5)"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  oauth2_proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.5
+    restart: unless-stopped
+    user: "65532:65532"
+    command:
+      - --provider=google
+      - --http-address=0.0.0.0:4180
+      - --upstream=http://app:8000
+      - --redirect-url=https://${DOFUS_DOMAIN:?Set the public hostname}/oauth2/callback
+      - --client-id=${GOOGLE_OAUTH_CLIENT_ID:?Set the OAuth web client ID}
+      - --client-secret-file=/run/secrets/google_client_secret
+      - --cookie-secret-file=/run/secrets/cookie_secret
+      - --authenticated-emails-file=/run/secrets/allowed_emails
+      - --scope=openid email profile
+      - --code-challenge-method=S256
+      - --reverse-proxy=true
+      - --trusted-proxy-ip=${DOFUS_TRUSTED_PROXY_IP:?Set the Nginx Proxy Manager container IP}/32
+      - --cookie-name=__Host-dofus_session
+      - --cookie-secure=true
+      - --cookie-httponly=true
+      - --cookie-samesite=lax
+      - --cookie-expire=12h
+      - --cookie-refresh=1h
+      - --cookie-csrf-per-request=true
+      - --cookie-csrf-per-request-limit=5
+      - --api-route=^/api/
+      - --pass-host-header=true
+      - --pass-access-token=false
+      - --pass-authorization-header=false
+      - --pass-basic-auth=false
+      - --pass-user-headers=false
+      - --skip-provider-button=true
+      - --request-logging=false
+      - --auth-logging=false
+      - --show-debug-on-error=false
+    secrets:
+      - google_client_secret
+      - cookie_secret
+      - allowed_emails
+    networks:
+      backend:
+      proxy:
+        aliases:
+          - dofus-google-login
+    depends_on:
+      app:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+networks:
+  backend:
+  proxy:
+    external: true
+    name: ${DOFUS_PROXY_NETWORK:?Set the existing reverse proxy network}
+
+secrets:
+  google_client_secret:
+    file: ${DOFUS_SECRETS_PATH:?Set the private secrets directory}/google_client_secret
+  cookie_secret:
+    file: ${DOFUS_SECRETS_PATH:?Set the private secrets directory}/cookie_secret
+  allowed_emails:
+    file: ${DOFUS_SECRETS_PATH:?Set the private secrets directory}/allowed_emails

@@ -61,7 +61,11 @@ uv run dofus-import
 uv run dofus-web
 ```
 
-The website binds to `127.0.0.1:8000` by default. Public or non-loopback binding is rejected because it requires a separate authentication, authorization, CSRF, HTTPS, secrets, and production-database design.
+The local command binds to `127.0.0.1:8000` and rejects non-loopback binding.
+For private VPS hosting with Gmail sign-in, use the separate
+[Docker and Google authentication deployment](docs/vps-deployment.md). It keeps
+FastAPI behind the login proxy, allows only explicitly listed Google accounts, and
+stores credentials and operational data outside Git.
 
 After completing the private Slack setup below, start the screenshot worker in a
 second terminal while the website is running:
