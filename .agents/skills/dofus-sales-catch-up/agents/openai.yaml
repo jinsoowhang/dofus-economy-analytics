@@ -1,4 +1,4 @@
 interface:
   display_name: "Dofus Sales Catch-up"
-  short_description: "Allocate screenshot sales across missed reporting days"
-  default_prompt: "Use $dofus-sales-catch-up to reconcile new sales screenshots and allocate reporting gaps using observed weekday trends."
+  short_description: "Reconcile today's new Slack sales without repeating uploads"
+  default_prompt: "Use $dofus-sales-catch-up to reconcile today's unprocessed sales screenshots in Duchess Nikki's #dofus-touch Slack channel, skipping already reconciled images and preserving same-day reporting."

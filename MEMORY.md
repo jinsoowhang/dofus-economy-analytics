@@ -1,6 +1,6 @@
 # Memory
 
-**Last updated:** 2026-10-10
+**Last updated:** 2026-10-17
 
 ## Dofus Touch Economy Analytics
 
@@ -234,7 +234,17 @@
   missing listings or guessed item identity.
 - The reusable repository skill is
   `.agents/skills/dofus-sales-catch-up/SKILL.md`, callable as
-  `$dofus-sales-catch-up`. It reconciles local screenshot batches and allocates
+  `$dofus-sales-catch-up`. By default it reads today's owner image uploads in
+  Duchess Nikki's Slack `#dofus-touch`, using Pacific date boundaries and exact
+  message timestamps. Explicit supplied images, Downloads, or dates override this.
+  Per-attachment provider IDs and SHA-256 hashes in committed private audits or
+  capture records prevent replay, including reuploads and multiple same-day runs.
+  A timestamp cutoff alone must not hide unresolved uploads or new attachments
+  on older messages. Existing October 12 audit fields already support this lookup.
+  Same-day subsequent reports use `manual` at their message timestamps and bypass
+  the next-day allocation helper; each run keeps a unique timestamped private audit.
+  Slack originals stay available; the installed skill symlink shares these changes.
+  It also reconciles supplied screenshot batches and allocates
   missed reporting days by observed weekday sale-count means. Its deterministic
   helper plans whole-sale allocations with largest remainders, preserves actual
   prices/revenue, and rejects invalid listing/evidence time bounds. It never writes
@@ -245,6 +255,38 @@
   the established complete August 22–September 12 baseline unless independently
   verified daily observations justify extending it. Zero-sale exposure requires
   a documented complete check; missing reports are not zero-sale days.
+- The owner authorized automatic deletion of processed screenshot originals from
+  Downloads. The catch-up skill now requires a byte-identical, SHA-256-verified
+  private evidence copy and a completed, verified sales audit before removing only
+  the used originals. Recheck hashes before deletion, retain blocked/uncertain or
+  modified originals, and record cleanup. Retry failed cleanup without replaying
+  committed sales. The installed user-directory symlink shares this updated skill.
+- On October 11, `IMG_9542.png` committed nine exact active equipment sales totaling
+  383,000 kamas on the single October 11 reporting day at the screenshot save time.
+  All use `manual`, with no price corrections or unknown historical costs. Eleven
+  resource-lot notifications remain out of scope and unchanged. The private audit
+  is `data/reports/manual-screenshot-sales-2026-10-11.json`; do not replay it.
+  An integrity-checked backup and isolated rehearsal preceded the atomic update.
+  Verification proves exactly nine listings changed, no observations appended,
+  original starts and unrelated data preserved, and counts of 786 sold/215 active.
+  The original screenshot was deleted from Downloads after successful saved-state
+  verification; its verified copy remains in the ignored audit evidence directory.
+- On October 12, the two newest Slack sales screenshots (`IMG_9547.png` and
+  `IMG_9548.png`) committed 15 exact active equipment sales for 695,000 kamas.
+  The previous committed report covers October 11, so this batch uses the single
+  October 12 reporting day and `manual` at the Slack parent timestamp. The time is
+  a reporting proxy; individual sale times and resulting timing metrics are
+  estimates. No price corrections were needed; all historical costs are known.
+  Thirty-four resource notifications remain outside the approved professions;
+  one clipped fragment was excluded. Repeated complete occurrences were preserved,
+  with no visually confirmed overlap. The private replay checkpoint is
+  `data/reports/manual-screenshot-sales-2026-10-12.json`, status `committed`.
+  Verified evidence, an online backup, and an isolated rehearsal preceded the
+  atomic update. Saved-state checks confirm exactly 15 listings changed, no price
+  observations appended, unrelated data preserved, and 801 sold/229 active.
+  Slack originals remain available; no corresponding Downloads files were present.
+  Direct manual reconciliation does not change Slack worker confirmation gates or
+  manufacture capture records. No Slack message or hosted publication was sent.
 - On October 10, Downloads screenshots `IMG_9539.png` and `IMG_9540.png` committed
   44 existing equipment listings totaling 2,031,000 kamas. Following the user's
   request and established interval convention, allocated October 6–10 as

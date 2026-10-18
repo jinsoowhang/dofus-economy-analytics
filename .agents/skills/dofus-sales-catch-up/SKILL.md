@@ -1,18 +1,24 @@
 ---
 name: dofus-sales-catch-up
-description: Reconcile Dofus Touch sold-notification screenshots with local Sales listings and allocate missed reporting days using observed weekday sales trends. Use for sales catch-up or gaps between screenshot reports.
+description: Reconcile today's unprocessed sales screenshots from Duchess Nikki's Slack dofus-touch channel with local Sales records, including repeated same-day runs. Also handle supplied screenshots and allocate missed reporting days using observed weekday sales trends.
 ---
 
 # Dofus sales catch-up
 
 Work from the Dofus Touch economy repository. Read its `AGENTS.md`, `MEMORY.md`,
 latest session notes, and [the operational workflow](references/operational-workflow.md).
-This skill handles user-supplied screenshots and local SQLite Sales updates.
+By default, read today's owner-uploaded sales screenshots in Duchess Nikki's Slack
+`#dofus-touch` channel. Read [the Slack workflow](references/slack-workflow.md) for
+date/time selection, per-attachment replay checks, and repeat same-day runs. An
+explicit user-supplied image, Downloads request, or date range overrides this default.
+This is a manually invoked local reconciliation; existing Slack worker gates remain
+unchanged, and reading screenshots does not authorize sending Slack messages.
 
 ## Evidence and reporting interval
 
-Find the user's Downloads directory, including its Windows mount when running in
-WSL, and inspect each relevant image visually. Preserve complete occurrences in
+For local screenshots, find the user's Downloads directory, including its Windows
+mount when running in WSL. For Slack, archive the selected attachments privately.
+Inspect each relevant image visually. Preserve complete occurrences in
 screen order, including repeated identical sales. Remove only visually established
 scroll overlap, never duplicates inferred from equal names/prices. Retain image and
 row identifiers, visible quantity, exact name, whole-kama lot total, and SHA-256.
@@ -26,9 +32,12 @@ manual audits and capture-file records before planning a replay.
 
 The established user-approved convention treats a catch-up batch as sales since
 the previous report: allocate from the following Pacific calendar day through the
-new screenshot's date, inclusive. Prefer an explicit supplied/filename date;
-otherwise use the established screenshot save-time convention, documenting it as
-a proxy. If the user says these are all sales since the last report, proceed under
+new screenshot's date, inclusive. A later report on the same Pacific date stays on
+that date; do not advance it to tomorrow or send it through the helper's next-day
+interval. Follow the Slack reference for this case. Prefer an explicit supplied or
+filename reporting date; otherwise use the Slack message timestamp for Slack images
+or the established save-time convention for local files, documenting either as a
+proxy. If the user says these are all sales since the last report, proceed under
 that convention without requesting approval again. If there is evidence of an
 intervening login, missing images, or an unclear date, prepare the transcript and
 matches first, then clarify the material interval before writing affected sales.
@@ -49,7 +58,9 @@ baseline dates, counts, exposure, and weights in the new private audit. Report t
 small samples and inventory changes limit the estimate. Missing weekday exposure
 or an all-zero eligible weight requires clarification, not invented trends.
 
-Run the deterministic helper from the repository:
+For a report on a later calendar date, run the deterministic helper from the
+repository. For repeated reports on the same date, use the single-day assignment
+in the Slack reference; the helper intentionally requires a later reporting date.
 
 ```bash
 uv run python .agents/skills/dofus-sales-catch-up/scripts/allocate_sales.py \
@@ -85,9 +96,24 @@ recipe costs null. Do not create missing listings or change unidentified expirat
 
 Retain the evidence dates, interval assumptions, training inputs, allocations,
 original/assigned timestamps, prices, listing IDs, backup, and verification under
-ignored `data/reports/`. Persist a planned audit before writing, and committed status
+ignored `data/reports/`. Give each run a unique timestamped audit path; never overwrite
+an earlier same-day audit. Persist a planned audit before writing, and committed status
 after successful saved-state verification. A planned or uncertain audit requires
 checking SQLite before retrying. Do not replay an already committed batch.
+
+For Downloads inputs, after successful saved-state verification and a committed
+audit, delete the processed screenshot originals from the user's Downloads folder.
+Before deleting,
+retain a byte-identical, SHA-256-verified evidence copy under the ignored audit
+directory and record its path and hash. Recheck each original's hash immediately
+before removal; remove only the exact screenshots used in this completed batch,
+and record cleanup results in the audit. The user has authorized this cleanup;
+do not request confirmation again. Keep screenshots when matching, committing,
+verification, or evidence archival is blocked or uncertain, or when the original
+has changed. Preserve unrelated Downloads files, private evidence copies, and
+backups. If only cleanup fails after a verified commit, retry cleanup without
+replaying the sales update. Retain Slack attachments and private evidence copies;
+Downloads cleanup authorization does not authorize Slack file deletion.
 
 Run focused Sales/capture tests, helper checks, lint/formatting, public-file policy,
 and `git diff --check`. Update project memory/session notes with durable outcomes
