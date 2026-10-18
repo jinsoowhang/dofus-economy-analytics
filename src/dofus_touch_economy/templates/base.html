@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Dofus Touch Economy{% endblock %}</title>
-    <link rel="stylesheet" href="/static/app.css?v=20261010-chart-gaps-rows">
+    <link rel="stylesheet" href="/static/app.css?v=20261012-crafting-task">
     <script src="/static/htmx.min.js" defer></script>
     <script src="/static/table-sort.js?v=20260909-recipe-order" defer></script>
     <script src="/static/site-navigation.js" defer></script>
@@ -47,7 +47,7 @@
           </details>
           <details class="site-menu">
             <summary
-              class="site-tab{% if active_tab in ['sales', 'price_review', 'profit_opportunities', 'best_sellers', 'out_of_stock'] %} is-active{% endif %}"
+              class="site-tab{% if active_tab in ['sales', 'price_review', 'profit_opportunities', 'best_sellers', 'out_of_stock', 'daily_crafting'] %} is-active{% endif %}"
             >
               <span>Sales</span>
               <span class="site-menu-caret" aria-hidden="true">&#9662;</span>
@@ -78,6 +78,11 @@
                 class="site-submenu-link{% if active_tab == 'profit_opportunities' %} is-active{% endif %}"
                 {% if active_tab == "profit_opportunities" %}aria-current="page"{% endif %}
               >Profit Opportunities</a>
+              <a
+                href="/todays-crafting-items"
+                class="site-submenu-link{% if active_tab == 'daily_crafting' %} is-active{% endif %}"
+                {% if active_tab == "daily_crafting" %}aria-current="page"{% endif %}
+              >Today's Crafting Items</a>
             </div>
           </details>
           <details class="site-menu">
@@ -98,7 +103,7 @@
         </nav>
       </div>
     </header>
-    <main class="page-shell{% if active_tab in ['price_priorities', 'price_review', 'recipes', 'recipe_calculator', 'profit_opportunities', 'best_sellers', 'out_of_stock', 'insights', 'dashboard'] %} page-shell--wide{% endif %}">
+    <main class="page-shell{% if active_tab in ['price_priorities', 'price_review', 'recipes', 'recipe_calculator', 'profit_opportunities', 'best_sellers', 'out_of_stock', 'daily_crafting', 'insights', 'dashboard'] %} page-shell--wide{% endif %}">
       {% block content %}{% endblock %}
     </main>
     {% block scripts %}{% endblock %}

@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from html import unescape
 from zoneinfo import ZoneInfo
 
 import pytest
@@ -30,6 +31,7 @@ def test_weekly_rotation_keeps_daily_order_and_uses_pacific_date(session, weekda
     assert report.today.weekday() == weekday
     assert [task.key for task in report.daily_tasks] == [
         "sales",
+        "daily-crafting",
         "restock",
         "opportunities",
         "dashboard",
@@ -189,6 +191,20 @@ def test_home_page_is_read_only_and_has_small_query_count(client, session_factor
     assert 'href="/sales/price-review"' in response.text
     assert "Checkmarks stay in this browser" in response.text
     assert 'src="/static/home.js?v=' in response.text
+    assert (
+        response.text.index('data-task-key="sales"')
+        < response.text.index('data-task-key="daily-crafting"')
+        < response.text.index('data-task-key="restock"')
+    )
+    assert '<span class="home-step">2</span>Today\'s Crafting Items' in unescape(response.text)
+    assert '<span class="home-step">3</span>Craft items that are out of stock' in response.text
+    assert '<span class="home-step">5</span>Check what is changing' in response.text
+    task_count = 6 if datetime.now(PACIFIC).weekday() in (0, 4) else 5
+    assert f"0 of {task_count} complete" in response.text
+    assert f'max="{task_count}"' in response.text
+    assert 'href="/todays-crafting-items"' in response.text
+    assert "data-crafting-item=" not in response.text
+    assert 'src="/static/recipe-cart.js"' not in response.text
     with session_factory() as session:
         assert session.scalar(select(func.count()).select_from(SaleListing)) == listing_count
         assert session.scalar(select(func.count()).select_from(PriceObservation)) == price_count

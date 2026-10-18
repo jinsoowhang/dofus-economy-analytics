@@ -105,7 +105,8 @@ Data contains BigQuery Sync, Dashboard, and Insights. Menus open by click or key
 when another menu opens, focus leaves, or Escape is pressed.
 Item opens an accessible submenu for Item Search,
 Recipes, and Recipe Calculator; Sales uses the same pattern for Sales Activity, Best
-Sellers, Out of Stock Items, Price Review, and Profit Opportunities. Item Search renders 100-row pages of alphabetical
+Sellers, Out of Stock Items, Price Review, Profit Opportunities, and Today's Crafting
+Items. Item Search renders 100-row pages of alphabetical
 catalog summaries and uses one bulk latest-price query for the active market context.
 Filtering replaces only the table fragment. Item rows link to detail; price changes remain append-only
 observations rather than direct edits. Recipes selects the latest recipe per crafted
@@ -124,10 +125,22 @@ summary tables use one local typed sorter. Selection and action-only columns rem
 controls rather than misleading sort targets.
 
 Home (`/`) is the default landing page. Five aggregate SQLite reads provide live
-sales/inventory context without loading recipe economics or the full Dashboard.
-The daily checklist follows Sales Activity, Out of Stock Items, Profit Opportunities,
-and the 7-day Dashboard, with Price Priorities added on Mondays and relisting on
-Fridays. Checkmarks are manual browser-local state for the current Pacific date;
+sales/inventory context. Today's Crafting Items is checklist task 2, linking to
+the separate `/todays-crafting-items` page under Sales, which uses up to four
+bulk reads for current recipe economics and sales history.
+It selects seven distinct, fully priced, profitable recipes with no active listing,
+using the Profit Opportunities profession defaults and level-60 limit. The first
+two are eligible Out of Stock items ranked by profit at their last sale price;
+remaining selections favor shared ingredient types, minimize new types against the
+growing batch, and break ties by current profit. Remaining profitable recipes fill
+gaps when restock or similar candidates run out; fewer than seven eligible recipes
+produce a shorter list. Each crafting-page load recomputes the list, and browser Back refreshes
+it. Calculator controls reuse the existing cart and cost-based quantity defaults.
+The page does not reconstruct historical recipe costs or load the full Dashboard.
+The five daily tasks follow Sales Activity, Today's Crafting Items, Out of Stock
+Items, Profit Opportunities, and the 7-day Dashboard, with a sixth task for Price
+Priorities on Mondays or relisting on Fridays. Progress and numbering derive from
+the task list. Checkmarks are manual browser-local state for the current Pacific date;
 navigation does not imply task completion. Midnight and stale-page checks refresh
 the routine, and cross-tab storage events synchronize completion. No UI telemetry
 or operational write is introduced by the checklist.

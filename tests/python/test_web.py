@@ -38,6 +38,7 @@ def test_main_pages_include_one_line_descriptions(client) -> None:
         "/profit-opportunities": "Discover currently profitable recipes",
         "/best-sellers": "Compare every item with completed Sales history",
         "/out-of-stock-items": "Items appear here after at least one completed sale",
+        "/todays-crafting-items": "Start with the top two eligible Out of Stock items",
         "/insights": "A stakeholder view of sales momentum, demand, inventory",
         "/dashboard": "Track realized profit, sales momentum",
         "/bigquery-sync": "Manually publish one immutable snapshot",

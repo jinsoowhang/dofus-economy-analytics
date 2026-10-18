@@ -2261,6 +2261,25 @@ th.numeric .client-sort-header {
   text-decoration: line-through;
 }
 
+.daily-crafting-table {
+  min-width: 38rem;
+}
+
+.daily-crafting-table th:first-child {
+  width: 30%;
+}
+
+.daily-crafting-table td {
+  padding: 0.6rem;
+}
+
+.daily-crafting-table small {
+  color: var(--muted);
+  display: block;
+  font-size: 0.75rem;
+  margin-block-start: 0.25rem;
+}
+
 .home-next {
   align-items: start;
   background: color-mix(in srgb, var(--accent) 8%, var(--surface));

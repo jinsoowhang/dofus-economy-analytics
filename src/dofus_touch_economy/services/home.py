@@ -86,6 +86,14 @@ class HomeService:
                 "Open Sales Activity",
             ),
             HomeTask(
+                "daily-crafting",
+                "Today's Crafting Items",
+                "Review seven profitable crafts that combine top restock items "
+                "with recipes sharing ingredients.",
+                "/todays-crafting-items",
+                "Open Today's Crafting Items",
+            ),
+            HomeTask(
                 "restock",
                 "Craft items that are out of stock",
                 f"{snapshot.out_of_stock_count:,} previously sold items have no active listing. "

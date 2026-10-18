@@ -1399,6 +1399,30 @@ def home_page(
     )
 
 
+@router.get("/todays-crafting-items", response_class=HTMLResponse)
+def todays_crafting_items_page(
+    request: Request,
+    session: Annotated[Session, Depends(get_session)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> HTMLResponse:
+    return templates.TemplateResponse(
+        request,
+        "todays_crafting_items.html",
+        context={
+            "active_tab": "daily_crafting",
+            "crafting_items": RecipeCatalogService(
+                session, settings.market_context
+            ).daily_crafting_items(
+                professions=DEFAULT_PROFIT_OPPORTUNITY_PROFESSIONS,
+                maximum_level=DEFAULT_OPPORTUNITY_MAX_LEVEL,
+            ),
+            "crafting_professions": DEFAULT_PROFIT_OPPORTUNITY_PROFESSIONS,
+            "crafting_maximum_level": DEFAULT_OPPORTUNITY_MAX_LEVEL,
+        },
+        headers={"Cache-Control": "no-store"},
+    )
+
+
 @router.get("/recipes", response_class=HTMLResponse)
 def recipes_page(
     request: Request,

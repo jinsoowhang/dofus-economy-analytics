@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Today's Crafting Items · Dofus Touch Economy{% endblock %}
+{% block content %}
+  <h1>Today's Crafting Items</h1>
+  <p class="page-description">
+    Start with the top two eligible Out of Stock items, then reuse their ingredients
+    across profitable recipes. All have zero active listings and positive current
+    estimated profit. {{ crafting_professions | join(', ') }} · level {{ crafting_maximum_level }} or below.
+    This list updates whenever you open this page.
+  </p>
+  <details class="collapsible-section" open>
+    <summary>
+      <span class="section-summary">
+        <h2>Crafting Candidates</h2>
+        <span>{{ crafting_items | length }} of 7 items</span>
+      </span>
+    </summary>
+    {% if crafting_items %}
+      <div class="recipe-cart-toolbar">
+        <span id="recipe-cart-count" aria-live="polite">0 items in calculator</span>
+        <a id="recipe-open-calculator" class="secondary-button" href="/recipe-calculator">Open Recipe Calculator</a>
+      </div>
+      <div class="item-table-wrap">
+        <table class="item-table daily-crafting-table" data-sortable-table>
+          <thead>
+            <tr>
+              <th data-sort-type="text">Item</th>
+              <th data-sort-type="text">Why This Item</th>
+              <th class="numeric" data-sort-type="number">Shared / New Ingredients</th>
+              <th class="numeric" data-sort-type="number">Current Profit</th>
+              <th data-sort-disabled>Calculator</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for choice in crafting_items %}
+              {% set item = choice.item %}
+              {% set calculator_quantity = item.recipe_cost | default_recipe_calculator_quantity %}
+              <tr data-crafting-item="{{ item.item_uuid }}">
+                <td>
+                  <a href="/items/{{ item.item_uuid }}" class="item-label">
+                    {% if item.icon_url %}<img class="item-icon" src="{{ item.icon_url }}" alt="" loading="lazy">{% endif %}
+                    <span>{{ item.display_name }}</span>
+                  </a>
+                  <small>{{ item.profession }} · level {{ item.profession_level }}</small>
+                </td>
+                <td>{{ choice.reason }}</td>
+                <td class="numeric" data-sort-value="{{ choice.shared_ingredient_count }}">
+                  {{ choice.shared_ingredient_count }} / {{ choice.new_ingredient_count }}
+                </td>
+                <td class="numeric">{{ '{:,}'.format(item.profit) }}</td>
+                <td class="recipe-cart-action">
+                  <button type="button" class="recipe-cart-add secondary-button"
+                    data-item-uuid="{{ item.item_uuid }}" data-craft-quantity="{{ calculator_quantity }}"
+                    data-cart-toggle="true" aria-pressed="false"
+                    data-add-aria-label="Add {{ calculator_quantity }} of {{ item.display_name }} to Recipe Calculator"
+                    data-remove-aria-label="Remove {{ item.display_name }} from Recipe Calculator"
+                    aria-label="Add {{ calculator_quantity }} of {{ item.display_name }} to Recipe Calculator">Add</button>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="table-context">
+        Shared / New counts compare ingredient types with earlier selections in the
+        original list. Similar recipes add the fewest new types; profit breaks ties.
+        When restock or similar choices run out, the best remaining profitable recipes fill the list.
+      </p>
+    {% else %}
+      <p>No fully priced, profitable recipes with zero active listings match your crafting professions and level.</p>
+    {% endif %}
+  </details>
+{% endblock %}
+{% block scripts %}
+  <script src="/static/recipe-cart.js" defer></script>
+  <script src="/static/daily-crafting.js" defer></script>
+{% endblock %}

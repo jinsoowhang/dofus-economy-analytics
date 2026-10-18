@@ -86,6 +86,22 @@ class RecipeCatalogRow:
 
 
 @dataclass(frozen=True)
+class DailyCraftingItem:
+    item: RecipeCatalogRow
+    is_anchor: bool
+    sold_count: int
+    shared_ingredient_count: int
+    new_ingredient_count: int
+
+    @property
+    def reason(self) -> str:
+        if self.is_anchor:
+            return "Top out of stock"
+        source = "Out of stock" if self.sold_count else "Profit opportunity"
+        return f"Shared ingredients · {source}" if self.shared_ingredient_count else source
+
+
+@dataclass(frozen=True)
 class RecipeCategoryChoice:
     key: str
     label: str
@@ -624,8 +640,121 @@ class RecipeCatalogService:
             ),
         )
 
-    def _rows(self) -> list[RecipeCatalogRow]:
-        recipes = _latest_recipe_catalog(self._session)
+    def daily_crafting_items(
+        self,
+        *,
+        professions: tuple[str, ...],
+        maximum_level: int,
+        as_of: datetime | None = None,
+    ) -> tuple[DailyCraftingItem, ...]:
+        """Start with two top restocks, then minimize added ingredient types up to seven."""
+        if not professions:
+            return ()
+        recipes = _latest_recipe_catalog(
+            self._session, professions=professions, maximum_level=maximum_level
+        )
+        if not recipes:
+            return ()
+        candidates = {
+            row.item_uuid: row
+            for row in self._rows(recipes)
+            if row.active_listing_count == 0 and row.profit is not None and row.profit > 0
+        }
+        if not candidates:
+            return ()
+        recipe_by_uuid = {recipe.item_uuid: recipe for recipe in recipes}
+        latest_sales = (
+            select(
+                SaleListing.item_id,
+                SaleListing.asking_price,
+                SaleListing.date_sold,
+                func.count().over(partition_by=SaleListing.item_id).label("sold_count"),
+                func.row_number()
+                .over(
+                    partition_by=SaleListing.item_id,
+                    order_by=(SaleListing.date_sold.desc(), SaleListing.id.desc()),
+                )
+                .label("sale_number"),
+            )
+            .where(
+                SaleListing.item_id.in_(
+                    recipe_by_uuid[uuid].crafted_item_id for uuid in candidates
+                ),
+                SaleListing.date_sold <= (as_of or datetime.now(UTC)),
+            )
+            .subquery()
+        )
+        sales = {
+            row.item_id: row
+            for row in self._session.execute(
+                select(latest_sales).where(latest_sales.c.sale_number == 1)
+            )
+        }
+
+        def restock_rank(item: RecipeCatalogRow):
+            sale = sales[recipe_by_uuid[item.item_uuid].crafted_item_id]
+            last_profit = (
+                None if sale.asking_price is None else sale.asking_price - item.recipe_cost
+            )
+            return (
+                last_profit is None,
+                Decimal(0) if last_profit is None else -last_profit,
+                -sale.date_sold.replace(tzinfo=UTC).timestamp(),
+                item.display_name.casefold(),
+                str(item.item_uuid),
+            )
+
+        anchors = sorted(
+            (
+                item
+                for item in candidates.values()
+                if recipe_by_uuid[item.item_uuid].crafted_item_id in sales
+            ),
+            key=restock_rank,
+        )[:2]
+        ingredient_keys = {
+            uuid: {item_id for item_id, _name, _quantity in recipe_by_uuid[uuid].ingredients}
+            for uuid in candidates
+        }
+        combined_ingredients: set[int] = set()
+        selected: list[DailyCraftingItem] = []
+
+        def add(item: RecipeCatalogRow, *, is_anchor: bool = False) -> None:
+            keys = ingredient_keys[item.item_uuid]
+            sale = sales.get(recipe_by_uuid[item.item_uuid].crafted_item_id)
+            selected.append(
+                DailyCraftingItem(
+                    item=item,
+                    is_anchor=is_anchor,
+                    sold_count=0 if sale is None else sale.sold_count,
+                    shared_ingredient_count=len(keys & combined_ingredients),
+                    new_ingredient_count=len(keys - combined_ingredients),
+                )
+            )
+            combined_ingredients.update(keys)
+            del candidates[item.item_uuid]
+
+        for item in anchors:
+            add(item, is_anchor=True)
+        while candidates and len(selected) < 7:
+
+            def similarity_rank(item: RecipeCatalogRow):
+                keys = ingredient_keys[item.item_uuid]
+                shares_ingredients = bool(keys & combined_ingredients)
+                return (
+                    not shares_ingredients,
+                    len(keys - combined_ingredients) if shares_ingredients else 0,
+                    -item.profit,
+                    item.display_name.casefold(),
+                    str(item.item_uuid),
+                )
+
+            add(min(candidates.values(), key=similarity_rank))
+        return tuple(selected)
+
+    def _rows(self, recipes: list[_CatalogRecipe] | None = None) -> list[RecipeCatalogRow]:
+        if recipes is None:
+            recipes = _latest_recipe_catalog(self._session)
         item_ids = {
             item_id
             for recipe in recipes
@@ -1091,11 +1220,16 @@ def _latest_recipe_ids():
     )
 
 
-def _latest_recipe_catalog(session: Session) -> list[_CatalogRecipe]:
+def _latest_recipe_catalog(
+    session: Session,
+    *,
+    professions: tuple[str, ...] = (),
+    maximum_level: int | None = None,
+) -> list[_CatalogRecipe]:
     crafted_item = aliased(Item)
     excluded_ingredient = _excluded_recipe_ingredient_exists()
     latest_recipe_ids = _latest_recipe_ids()
-    rows = session.execute(
+    statement = (
         select(
             Recipe.id.label("recipe_id"),
             Recipe.uuid.label("recipe_uuid"),
@@ -1116,6 +1250,23 @@ def _latest_recipe_catalog(session: Session) -> list[_CatalogRecipe]:
         .where(active_catalog_item_clause(crafted_item), ~excluded_ingredient)
         .order_by(Recipe.id, RecipeIngredient.position)
     )
+    if professions:
+        statement = statement.where(
+            func.lower(Recipe.profession).in_(profession.casefold() for profession in professions)
+        )
+    if maximum_level is not None:
+        ingredient_count = (
+            select(func.count())
+            .select_from(RecipeIngredient)
+            .where(RecipeIngredient.recipe_id == Recipe.id)
+            .correlate(Recipe)
+            .scalar_subquery()
+        )
+        allowed_counts = [
+            count for count in range(1, 9) if required_profession_level(count) <= maximum_level
+        ]
+        statement = statement.where(ingredient_count.in_(allowed_counts))
+    rows = session.execute(statement)
     recipes_by_id: dict[int, _CatalogRecipe] = {}
     for row in rows:
         recipe = recipes_by_id.get(row.recipe_id)

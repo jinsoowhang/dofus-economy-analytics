@@ -524,14 +524,38 @@
 
 - Home now renders at `/` as the default UI page; the brand and Home navigation link
   return there. Its ordered daily checklist follows the user's routine: mark sales,
-  craft out-of-stock items, craft Profit Opportunities, then review the 7-day Dashboard.
+  Today's Crafting Items, craft out-of-stock items, craft Profit Opportunities, then
+  review the 7-day Dashboard. Today's Crafting Items is task 2, with its own stable
+  `daily-crafting` completion key. Existing task keys and saved completion remain
+  valid. Five core tasks become six on weekly maintenance days; progress and weekly
+  task numbering derive from the actual task list.
   The user explicitly chose Monday Price Priorities and Friday relisting. Only the
   matching weekly task joins that day's checklist; the whole week remains visible.
 - Home uses five read-only scalar queries for today's recorded sales/revenue, active
   listings/value, previously sold items with no active listing, latest sale, and
-  listings due for the existing fourteen-Pacific-day price review. It avoids recipe-cost
-  reconstruction and loading full dashboard or recipe projections on the landing page.
-  Missing prices are counted explicitly and future-dated sales are excluded.
+  listings due for the existing fourteen-Pacific-day price review. Task 2 links to
+  Today's Crafting Items; Home does not load crafting recommendations or recipe
+  cart scripts.
+  Its snapshot counts still identify missing prices and exclude future-dated sales.
+- Today's Crafting Items now lives at `/todays-crafting-items` under the Sales
+  header, with its own active submenu entry and wide page layout. It uses up to
+  four bulk reads for scoped current recipe economics and recent sales, avoiding
+  historical recipe-cost reconstruction. It selects up to seven distinct fully
+  priced recipes, all with zero
+  active listings and positive current estimated profit, restricted to Shoemaker,
+  Jeweller, and Tailor through level 60. The first two use the existing Out of Stock
+  profit-at-last-sale-price ranking. Five further choices prioritize shared material
+  types and the fewest new types against the growing batch, with current profit
+  breaking ties. If restock/similar candidates run out, profitable recipes fill the
+  remaining places; insufficient eligible inventory yields a shorter list.
+  Current stock, prices, recipe versions, and catalog exclusions are recalculated
+  on each crafting-page request. Browser Back refreshes that page instead of
+  restoring stale rows; Home retains its original checklist restoration behavior.
+  Each row shows its reason, shared/new type counts, current profit, and an existing
+  calculator cart toggle with the cost-based quantity default. Desktop and mobile
+  checks cover cart add/remove, quantity submission, checklist progress, and bounded
+  table scrolling. The crafting-page render sample is about 0.6 seconds after SQL scope
+  filtering; timings are observations rather than a performance guarantee.
 - Home checklist completion is manual and browser-local (`dofus-home-checklist-v1`),
   keyed to the Pacific calendar date, with progress and an Up next link. It persists
   across refresh/navigation and synchronizes tabs. Stale-day pages reload at midnight
