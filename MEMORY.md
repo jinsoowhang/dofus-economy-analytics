@@ -11,11 +11,12 @@
   package, CLI commands, and `dofus_touch_economy_analytics` dbt project/profile
   identifiers for compatibility. Historical design/session records retain their
   original names; active repository links and clone instructions use the new name.
-- The local checkout is now `Project/dofus-economy-analytics`; the installed
-  screenshot catch-up skill symlink targets its new location. Windows locked
-  nested directories during the move, so only empty directory shells remain under
-  the old path. They contain no project files. Rebuild the root `.venv` when moving
-  the checkout because console scripts contain absolute interpreter paths.
+- The canonical local checkout is `Project/Games/dofus-economy-analytics`.
+  The empty old root folder and obsolete Games junction have been removed;
+  the project index and `Dofus Economy.lnk` point to the canonical folder.
+  The installed screenshot catch-up skill symlink and private Git worktree links
+  use the current location. Rebuild the root `.venv` when moving the checkout
+  because console scripts and editable imports contain absolute paths.
 
 - October 17 GitHub publication separates the screenshot catch-up workflow,
   private hosting preparation, daily crafting page, and Dofus game/server support
@@ -394,6 +395,18 @@
   original starts and unrelated data preserved, and counts of 786 sold/215 active.
   The original screenshot was deleted from Downloads after successful saved-state
   verification; its verified copy remains in the ignored audit evidence directory.
+- On October 18, reconciled the two October 17 Slack screenshots for Touch / Blair:
+  26 existing equipment listings sold for 1,455,000 kamas, with no price corrections
+  and all historical costs known. Removed two visually confirmed scroll-overlap
+  rows; twelve resource notifications remain reviewed exclusions. The last report
+  covered October 12; the established weekday baseline assigns October 13–17 as
+  5, 5, 6, 4, and 6 sales, using `manual_estimated_date`. Dates and daily profit/timing
+  metrics are estimates; charts currently show assigned dates without badges.
+  Replay checkpoint: ignored
+  `data/reports/manual-screenshot-sales-2026-10-18-230550428436Z.json`, committed
+  after backup, rehearsal, and saved-state verification. Exactly 26 listings changed,
+  no observations appended, original starts/unrelated tables/PC database preserved;
+  Blair now has 827 sold and 203 active listings. Slack originals remain available.
 - On October 12, the two newest Slack sales screenshots (`IMG_9547.png` and
   `IMG_9548.png`) committed 15 exact active equipment sales for 695,000 kamas.
   The previous committed report covers October 11, so this batch uses the single
