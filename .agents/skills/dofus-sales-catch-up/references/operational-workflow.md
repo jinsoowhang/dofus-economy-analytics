@@ -4,6 +4,14 @@ Discover project paths through `Settings.from_env()`; the usual ignored database
 `data/app/dofus_touch.sqlite3`. Use the configured market. Read the current versions
 of the named classes before preparing a private driver script.
 
+Check `MEMORY.md` for the authoritative writer before using that local default.
+Once VPS cutover is complete, run the backup, plan, rehearsal, and transaction
+against its authoritative Touch database through the existing private SSH/container
+workflow. A local copy may support review but must not become another writer.
+Use `create_session_factory` so every plan and command is scoped to the original
+owner; verify `session.owner_id == "owner"` and every selected listing's owner.
+Never broaden the scope or use another account's listings to satisfy a screenshot.
+
 ## Match without writes
 
 - Build `CaptureExtraction(screen_kind=ScreenKind.SOLD_NOTIFICATION,
@@ -49,15 +57,21 @@ SalesService(session, market_context).mark_listings_sold_at(
 ```
 
 Group rows by timestamp/source and commit the entire batch once, after verification.
-The service appends observations only for corrected prices, preserves original
-listing starts, and calculates historical recipe cost at each assigned timestamp.
+Under the multi-user implementation, the service appends one anonymous shared
+price observation for each priced completed sale: a linked correction observation
+when the screenshot changes the price, or an unlinked `sale_completed` observation
+when the price is unchanged. Older implementations append only corrections;
+inspect the deployed service version before determining the expected changes.
+It preserves original listing starts and calculates historical recipe cost at
+each assigned timestamp.
 Existing observations stay immutable. Capture UUID is null for this local manual
 workflow; do not manufacture Slack capture records.
 
 Verify before commit and on saved SQLite: integrity and foreign-key checks; exactly
 the selected listings changed; no listing created/deleted; original starts and
 unrelated fields preserved; assigned timestamp, actual price, and source match the
-plan; only necessary corrected-price observations appended; prior observations and
+plan; exactly the service-version-appropriate sale-price observations appended,
+with original-owner contributor keys; prior observations and
 unrelated tables unchanged; sale count and revenue conserved. Record unknown-cost
 coverage explicitly. Verify on the rehearsal copy first. If a commit completes but
 report finalization fails, recover the audit from saved state instead of retrying

@@ -36,7 +36,7 @@
 
   <h3>Price History</h3>
   {% if visible_price_history %}
-    <p class="section-help">Each row groups the same price recorded on the same day. Deleting a row removes all of that day's matching entries from Price History.</p>
+    <p class="section-help">Each row groups the same price recorded on the same day. You can remove your own matching contributions; administrators can correct any shared price.</p>
     <div class="price-history-table-wrap">
       <table class="price-history-table" data-sortable-table>
         <thead>
@@ -52,6 +52,7 @@
               <td>{{ observation.observed_at.strftime("%Y-%m-%d") }}</td>
               <td class="numeric">{{ "{:,}".format(observation.total_price) }}</td>
               <td>
+                {% if observation.can_invalidate %}
                 <form
                   method="post"
                   action="/price-observations/{{ observation.observation_uuid }}/delete"
@@ -66,6 +67,7 @@
                     title="Delete price history row"
                   >×</button>
                 </form>
+                {% endif %}
               </td>
             </tr>
           {% endfor %}

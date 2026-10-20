@@ -10,12 +10,14 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
+from starlette.concurrency import run_in_threadpool
 from starlette.middleware.gzip import GZipMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from dofus_touch_economy.bigquery_sync import BigQuerySyncManager
 from dofus_touch_economy.config import Settings
 from dofus_touch_economy.database import create_engine_for_url, create_session_factory
+from dofus_touch_economy.services.accounts import Account, AccountConflict, AccountService
 from dofus_touch_economy.worlds import (
     DEFAULT_WORLD,
     WORLD_COOKIE,
@@ -34,6 +36,9 @@ async def _request_world(request: Request):
         ("application/x-www-form-urlencoded", "multipart/form-data")
     ):
         form = await request.form()
+        account_ids = form.getlist("account_id")
+        if account_ids and any(value != request.state.account.id for value in account_ids):
+            raise HTTPException(409, "Account changed; reload this page before submitting")
         keys = form.getlist("world")
         if keys:
             if len(set(keys)) != 1:
@@ -55,7 +60,8 @@ async def get_session(request: Request) -> AsyncIterator[Session]:
     settings = world_settings(request.app.state.settings, world)
     if world != DEFAULT_WORLD and not settings.database_path.is_file():
         raise HTTPException(503, "Dofus catalog is not initialized; run dofus-sync-pc first")
-    with factory() as session:
+    account = request.state.account
+    with factory(info={"owner_id": account.id, "is_admin": account.is_admin}) as session:
         yield session
 
 
@@ -64,6 +70,8 @@ async def get_settings(request: Request) -> Settings:
 
 
 async def get_bigquery_sync_manager(request: Request) -> BigQuerySyncManager:
+    if not request.state.account.is_admin:
+        raise HTTPException(403, "Only the owner can publish analytical snapshots")
     world = await _request_world(request)
     if world == DEFAULT_WORLD:
         return request.app.state.bigquery_sync_manager
@@ -100,6 +108,7 @@ def create_app(
     application.state.settings = resolved_settings
     application.state.session_factory = session_factory
     application.state.world_session_factories = factories
+    application.state.accounts = AccountService(factories[DEFAULT_WORLD.key], resolved_settings)
     application.state.bigquery_sync_manager = bigquery_sync_manager or BigQuerySyncManager(
         resolved_settings.bigquery_project_id,
         resolved_settings.bigquery_location,
@@ -128,7 +137,9 @@ def create_app(
         request.state.world = selected
         response = RedirectResponse(world_url("/", selected), status_code=303)
         response.set_cookie(
-            WORLD_COOKIE,
+            WORLD_COOKIE
+            if request.state.account.id == "owner"
+            else f"{WORLD_COOKIE}_{request.state.account.id}",
             selected.key,
             max_age=365 * 24 * 60 * 60,
             httponly=True,
@@ -137,8 +148,59 @@ def create_app(
         )
         return response
 
+    @application.get("/healthz", include_in_schema=False)
+    def health():
+        return {"status": "ok"}
+
+    @application.get("/account/status", include_in_schema=False)
+    def account_status(request: Request):
+        return {"account_id": request.state.account.id}
+
     @application.middleware("http")
     async def enforce_same_origin(request: Request, call_next):
+        request.state.account = Account("owner", "", "approved", True, False)
+        if request.url.path == "/healthz":
+            return await call_next(request)
+        if resolved_settings.accounts_enabled:
+            subject = request.headers.get("x-forwarded-user", "")
+            email = request.headers.get("x-forwarded-email", "")
+            if not subject or not email:
+                return JSONResponse(
+                    status_code=401,
+                    content={"detail": "Google sign-in required"},
+                    headers={"Cache-Control": "private, no-store"},
+                )
+            try:
+                request.state.account = await run_in_threadpool(
+                    application.state.accounts.identify, subject, email
+                )
+            except AccountConflict:
+                return JSONResponse(
+                    status_code=403,
+                    content={"detail": "Account identity conflict"},
+                    headers={"Cache-Control": "private, no-store"},
+                )
+            if request.state.account.status != "approved":
+                if request.url.path != "/access-request":
+                    if request.url.path.startswith("/api/") or request.method in UNSAFE_METHODS:
+                        return JSONResponse(
+                            status_code=403,
+                            content={"detail": "Account approval required"},
+                            headers={"Cache-Control": "private, no-store"},
+                        )
+                    return RedirectResponse(
+                        "/access-request",
+                        status_code=303,
+                        headers={"Cache-Control": "private, no-store"},
+                    )
+                from dofus_touch_economy.routers.accounts import access_response
+
+                return access_response(request)
+        supplied_account = request.headers.get("x-economy-account")
+        if supplied_account is not None and supplied_account != request.state.account.id:
+            return JSONResponse(
+                status_code=409, content={"detail": "Account changed; reload this page"}
+            )
         explicit_keys = request.query_params.getlist("world")
         header_world = request.headers.get("x-economy-world")
         if header_world is not None:
@@ -152,7 +214,12 @@ def create_app(
             request.state.world = find_world(
                 explicit_keys[0]
                 if explicit_keys
-                else request.cookies.get(WORLD_COOKIE, DEFAULT_WORLD.key)
+                else request.cookies.get(
+                    WORLD_COOKIE
+                    if request.state.account.id == "owner"
+                    else f"{WORLD_COOKIE}_{request.state.account.id}",
+                    DEFAULT_WORLD.key,
+                )
             )
         except ValueError as error:
             if explicit_keys:
@@ -193,8 +260,10 @@ def create_app(
             request.state.explicit_world or world != DEFAULT_WORLD
         ):
             response.headers["hx-redirect"] = world_url(response.headers["hx-redirect"], world)
+        response.headers["Cache-Control"] = (
+            "private, no-store" if resolved_settings.accounts_enabled else "no-store"
+        )
         if not request.url.path.startswith(("/static/", "/item-icons/")):
-            response.headers["Cache-Control"] = "no-store"
             response.headers["X-Economy-World"] = world.key
         return response
 
@@ -219,4 +288,7 @@ def create_app(
     )
     application.include_router(web.router)
     application.include_router(api.router, prefix="/api/v1")
+    from dofus_touch_economy.routers.accounts import router as accounts_router
+
+    application.include_router(accounts_router)
     return application

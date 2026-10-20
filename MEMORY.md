@@ -1,6 +1,6 @@
 # Memory
 
-**Last updated:** 2026-10-18
+**Last updated:** 2026-10-19
 
 ## Dofus Economy Analytics
 
@@ -69,16 +69,71 @@
   A PC snapshot dry run passed the unchanged schema contract.
 
 - Public identity: analytics engineering for player-observed Dofus Touch item prices, crafting economics, sales behavior.
-- VPS deployment preparation uses the existing Nginx Proxy Manager and a Docker
-  Google OAuth2 Proxy gateway with an explicit private email allowlist. The app
+- The approved October 18 multi-user design is implemented and deployed against
+  disposable VPS state as of October 19. See ADR 0005 and
+  `notes/Multi-user Economy and Access Requests Design.md`. Google authentication
+  is open to access applicants; the application checks approval on every request.
+  The default Touch database centrally owns Google subject/email, approvals, and
+  durable throttled notification state. The configured owner binds the reserved
+  `owner` key on their first verified Google sign-in; other accounts start pending.
+- Alembic `0012` is now applied to both authoritative local databases after fresh
+  online backups, rehearsals, a write lock, and exact before/after comparisons.
+  Every prior field is unchanged; the 827 sold and 203 active Touch listings,
+  capture records, and legacy price observations belong to the reserved owner.
+  Integrity and foreign keys pass, and both local worlds render normally.
+  Backups and verification: ignored
+  `data/reports/vps-deployment-2026-10-18/local-ownership-applied.json`.
+- Request SQLAlchemy sessions enforce an immutable owner scope across private ORM
+  reads, aggregates, aliases, nested queries, relationships, and mutations. Legacy
+  bulk mapping APIs and bulk inserts that bypass flush validation are rejected.
+  The administrator has no other-user Sales bypass. Trusted local CLI/worker
+  sessions default to `owner`; raw/Core connections remain maintenance-only.
+- Catalogs, recipes, icons, and prices remain shared within each world. Contributors
+  and the owner may invalidate their authorized observations; other contributors'
+  free-text notes/reasons stay private. Listing/relisting and completed Sales append
+  anonymous observations; an unchanged-price completion uses `sale_completed` and
+  preserves the listing's linked original observation and Selling Since.
+  Browser carts, selections, craft quantities, checklist, and world preferences
+  are account-scoped; stale-tab writes are rejected and shared HTMX history is off.
+  BigQuery web controls remain owner-only, with owner Sales and anonymous shared
+  prices in snapshots, excluding identities, other-user Sales, and private notes.
+- Invite mail uses private TLS SMTP configuration mounted only into the app.
+  **SMTP is not configured yet**: the protected runtime file currently contains
+  `{}`, so pending users truthfully see a saved request and pending notification.
+  Only SMTP acceptance permits the sent message. Failed attempts retry at most
+  once per ten minutes; the owner can retry from Access requests. Successful sends
+  are not repeated on refresh. The Google OAuth Web credential cannot send mail.
+  Asked for a private SMTP configuration path and confirmation of owner sign-in;
+  neither has been supplied during this resumed session.
+- October 18 hosting progress: the owner supplied a valid Google OAuth Web
+  client with the exact public callback. Its secret is installed only in private
+  VPS configuration. The domain now routes through the Google login gateway;
+  branding pages remain public, operational pages/assets redirect to Google, and
+  unauthenticated APIs return 401. Nine unrelated proxy hosts are unchanged.
+  NPM's actual internal peer changed to `.3` after restart; the private config uses
+  the inspected current peer, not the older `.2` preparation value.
+  The deployed app currently uses disposable empty databases for both worlds;
+  **local SQLite remains authoritative and live data has not been transferred**.
+  Owner Google sign-in and real invite mail must be verified before final cutover.
+  Next: configure SMTP, verify real owner/applicant sign-in and request delivery,
+  stop/check local writers, and take fresh online backups of both databases.
+  Preserve the VPS Touch account registry when replacing disposable state, so
+  verified subjects, approvals, and notification state survive. Transfer and verify
+  both databases plus the shared icon cache, then switch to production state.
+  Screenshot reconciliation must target the VPS after that switch. Private progress and
+  checks: `data/reports/vps-deployment-2026-10-18/status.json`.
+- VPS deployment uses the existing Nginx Proxy Manager and a Docker Google OAuth2
+  Proxy gateway, with Google identity headers overwritten by the gateway and
+  application-managed account approval replacing the old gateway email allowlist. The app
   and gateway publish no ports; the gateway and separate public information service
   join the existing proxy network, while the app stays on its backend network.
   `DOFUS_PUBLIC_ORIGIN` enables exact HTTPS Origin/Referer checks for every write;
-  the local `dofus-web` command remains loopback-only. All allowed accounts share
-  the same database; user-separated data and permissions remain out of scope.
+  the local `dofus-web` command remains loopback-only. Private records are scoped
+  by account within the selected world's SQLite database.
 - Runtime state belongs outside the VPS checkout, with app UID 10001 and login
-  proxy UID 65532. OAuth secrets and allowed email addresses remain private files
-  mounted only into the gateway. Docker build inputs exclude operational data and
+  proxy UID 65532. OAuth secrets are mounted only into the gateway; SMTP configuration
+  is mounted only into the app, and the private owner email stays in runtime config.
+  Docker build inputs exclude operational data and
   secrets. The public-file policy also rejects deployment secrets and private keys;
   GitHub CI scans complete Git history with pinned Gitleaks.
 - October 11 preparation passed the full local check (478 Python tests and 126 dbt
@@ -87,7 +142,7 @@
   attributes, API and asset protection, forged credentials, origin denial, database
   integrity, and restart persistence. The actual Gmail callback and owner/other-user
   authorization still require real OAuth credentials and live testing.
-- Live hosting/cutover remains pending the selected hostname, owner Gmail address,
+- Historical October 11 preparation: live hosting/cutover was pending the hostname, owner Gmail address,
   and Google OAuth Web client configuration. No live database was transferred, no
   existing site was changed, and test containers/networks were removed. At cutover,
   choose the VPS as the single authoritative writer, stop local writers, transfer

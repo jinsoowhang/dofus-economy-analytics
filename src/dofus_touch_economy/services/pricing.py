@@ -116,7 +116,7 @@ class PriceService:
         )
         self._session.add(observation)
         self._session.commit()
-        return _observation_response(observation)
+        return self._response(observation)
 
     def invalidate(self, observation_uuid: UUID, reason: str) -> PriceObservationResponse:
         stripped_reason = reason.strip()
@@ -144,7 +144,7 @@ class PriceService:
         observation = self._repository.get_by_uuid(observation_uuid, self._market_context)
         if observation is None:  # pragma: no cover - protected by the successful update
             raise ObservationNotFound(str(observation_uuid))
-        return _observation_response(observation)
+        return self._response(observation)
 
     def invalidate_history_row(self, observation_uuid: UUID, reason: str) -> int:
         """Invalidate the full UTC-day/price group represented by one visible row."""
@@ -154,6 +154,8 @@ class PriceService:
         observation = self._repository.get_by_uuid(observation_uuid, self._market_context)
         if observation is None:
             raise ObservationNotFound(str(observation_uuid))
+        if not self._session.is_admin and observation.contributor_id != self._session.owner_id:
+            raise ObservationConflict(str(observation_uuid))
         day_start = _as_utc(observation.observed_at).replace(
             hour=0, minute=0, second=0, microsecond=0
         )
@@ -207,7 +209,7 @@ class PriceService:
 
     def history_for_item(self, item_id: int, limit: int = 20) -> list[PriceObservationResponse]:
         return [
-            _observation_response(observation)
+            self._response(observation)
             for observation in self._repository.history(item_id, self._market_context, limit)
         ]
 
@@ -216,6 +218,14 @@ class PriceService:
         if observation is None:
             raise ObservationNotFound(str(observation_uuid))
         return observation.item.uuid
+
+    def _response(self, observation: PriceObservation) -> PriceObservationResponse:
+        result = _observation_response(observation)
+        if not self._session.is_admin and observation.contributor_id != self._session.owner_id:
+            result = result.model_copy(
+                update={"note": None, "invalidation_reason": None, "can_invalidate": False}
+            )
+        return result
 
 
 def _current_price_response(observation: PriceObservation) -> CurrentPriceResponse:

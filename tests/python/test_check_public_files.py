@@ -50,6 +50,7 @@ def test_rejects_private_or_generated_files() -> None:
         "deploy/allowed_emails",
         "deploy/google_client_secret",
         "deploy/cookie_secret",
+        "deploy/invite_mail_config.json",
         "deploy.local.env",
         "nested/private.pem",
         "nested/private.key",

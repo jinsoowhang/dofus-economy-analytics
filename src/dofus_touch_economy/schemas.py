@@ -174,6 +174,7 @@ class PriceObservationResponse(CurrentPriceResponse):
     note: str | None
     invalidated_at: datetime | None
     invalidation_reason: str | None
+    can_invalidate: bool = True
 
 
 class RecipeIngredientResponse(BaseModel):

@@ -6,6 +6,8 @@ from sqlalchemy.engine import Engine, make_url
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from dofus_touch_economy.ownership import EconomySession
+
 
 class Base(DeclarativeBase):
     pass
@@ -44,4 +46,4 @@ def create_engine_for_url(database_url: str | URL) -> Engine:
 
 
 def create_session_factory(engine: Engine) -> sessionmaker[Session]:
-    return sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+    return sessionmaker(bind=engine, class_=EconomySession, autoflush=False, expire_on_commit=False)

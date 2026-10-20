@@ -319,3 +319,45 @@ def test_bigquery_loader_appends_nullable_sale_lineage_and_snooze_columns(tmp_pa
         "sale_source",
         "sale_capture_uuid",
     ]
+
+
+def test_snapshot_excludes_other_users_sales_identity_and_private_price_notes(
+    tmp_path: Path,
+) -> None:
+    from dofus_touch_economy.models import PriceObservation, UserAccount
+
+    database_path = tmp_path / "application.sqlite3"
+    _create_database(database_path)
+    engine = create_engine_for_url(f"sqlite+pysqlite:///{database_path}")
+    factory = create_session_factory(engine)
+    with factory() as session:
+        item = session.scalar(select(Item))
+        item_id = item.id
+        session.add(SaleListing(item_id=item_id, lot_quantity=1, asking_price=123))
+        session.add(
+            UserAccount(id="owner", email="owner@example.test", status="approved", is_admin=True)
+        )
+        session.commit()
+    with factory(info={"owner_id": "alice", "is_admin": False}) as session:
+        session.add(SaleListing(item_id=item_id, lot_quantity=1, asking_price=456))
+        session.add(
+            PriceObservation(
+                item_id=item_id,
+                lot_quantity=1,
+                total_price=789,
+                observed_at=datetime.now(UTC),
+                market_context="Dodge",
+                note="Private Alice note",
+            )
+        )
+        session.commit()
+    engine.dispose()
+    snapshot = extract_operational_snapshot(database_path)
+    assert "user_accounts" not in snapshot.row_counts
+    sales = next(t for t in snapshot.tables if t.contract.name == "sale_listings")
+    prices = next(t for t in snapshot.tables if t.contract.name == "price_observations")
+    assert len(sales.rows) == 1 and sales.rows[0]["asking_price"] == 123
+    assert "owner_id" not in sales.rows[0]
+    assert prices.rows[0]["total_price"] == 789
+    assert prices.rows[0]["note"] is None
+    assert "contributor_id" not in prices.rows[0]

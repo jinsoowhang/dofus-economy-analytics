@@ -69,8 +69,9 @@ FastAPI reads and writes SQLite through repositories and services. Routers trans
 
 Item Price History groups observations by UTC observed day and total price within
 the item and market. Its delete action atomically audit-invalidates all valid
-observations in that displayed group, including duplicates outside the history
-page's limit. Other observation invalidation endpoints remain single-observation
+observations contributed by the acting account in that displayed group, including
+duplicates outside the history page's limit. The owner may correct any contributor's
+observations. Other observation invalidation endpoints remain single-observation
 actions, and existing invalidation timestamps and reasons are preserved.
 
 The optional Slack Bolt Socket Mode worker is a separate local process with its own
@@ -91,14 +92,23 @@ remains disabled until its private layout gate is met.
 The local browser interface uses server-rendered Jinja templates and a reviewed, vendored HTMX release. The JSON API under `/api/v1` calls the same services. Trusted hosts, same-origin browser mutations, and a loopback-only launch command define the current single-user security boundary.
 
 The optional [VPS deployment](vps-deployment.md) places Nginx Proxy Manager and
-Google OAuth2 Proxy in front of the same application. An explicit private email
-allowlist authorizes access to every HTML, API, and asset route. Neither service
+Google OAuth2 Proxy in front of the same application. Google authenticates accounts;
+the application checks owner-managed approval on every HTML, API, and asset route.
+Pending accounts see only their access-request status. Neither service
 publishes an application port, and only the login proxy joins NPM's network.
 Hosted mode configures `DOFUS_PUBLIC_ORIGIN` and requires exact HTTPS Origin or
-Referer validation on writes. Google credentials, the cookie secret, the allowlist,
+Referer validation on writes. Google credentials, the cookie secret, SMTP configuration,
 and persistent SQLite/icon state stay outside the public checkout and image.
-All allowed accounts share one operational database; multi-tenant permissions
-remain deferred. The VPS becomes the authoritative writer only after cutover.
+Approved accounts share catalogs, recipes, and anonymous market observations within
+each world. Listings, Sales, screenshot records, and personal reports are isolated
+by an immutable owner scope on SQLAlchemy sessions, including for the administrator.
+The central account/approval/email registry lives only in Touch's database. Browser
+carts and checklist state are scoped by account and world, and stale-tab writes
+are rejected after an account switch. Completed sales publish an append-only price
+without replacing the listing's original observation. Analytical Sales exports
+remain restricted to the original owner and exclude account/contributor keys and
+other contributors' private notes. See [ADR 0005](adr/0005-isolate-user-economies.md).
+The VPS becomes the authoritative writer only after cutover.
 
 Exact public branding paths `/about`, `/privacy`, and `/public.css` use a separate
 static container with no application-network membership, database, or credential

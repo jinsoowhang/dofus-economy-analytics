@@ -216,17 +216,36 @@ def _read_table(
 ) -> SnapshotTable:
     actual_columns = {row[1] for row in connection.execute(f'PRAGMA table_info("{contract.name}")')}
     expected_columns = {column.name for column in contract.columns}
-    if actual_columns != expected_columns:
+    private_columns = (
+        {"owner_id"}
+        if contract.name == "sale_listings"
+        else ({"contributor_id"} if contract.name == "price_observations" else set())
+    )
+    if actual_columns - private_columns != expected_columns:
         missing = sorted(expected_columns - actual_columns)
-        unexpected = sorted(actual_columns - expected_columns)
+        unexpected = sorted(actual_columns - expected_columns - private_columns)
         raise ValueError(
             f"{contract.name} schema does not match the analytical contract; "
             f"missing={missing}, unexpected={unexpected}"
         )
 
-    selected_columns = ", ".join(f'"{column.name}"' for column in contract.columns)
+    selected_columns = ", ".join(
+        f"CASE WHEN contributor_id = 'owner' THEN \"{column.name}\" ELSE NULL END "
+        f'AS "{column.name}"'
+        if contract.name == "price_observations"
+        and "contributor_id" in actual_columns
+        and column.name in {"note", "invalidation_reason"}
+        else f'"{column.name}"'
+        for column in contract.columns
+    )
+    # Existing warehouse Sales analytics remain the original owner's history.
+    owner_filter = (
+        " WHERE owner_id = 'owner'"
+        if contract.name == "sale_listings" and "owner_id" in actual_columns
+        else ""
+    )
     raw_rows = connection.execute(
-        f'SELECT {selected_columns} FROM "{contract.name}" ORDER BY "id"'
+        f'SELECT {selected_columns} FROM "{contract.name}"{owner_filter} ORDER BY "id"'
     ).fetchall()
     rows = tuple(
         {column.name: _normalize_value(row[column.name], column) for column in contract.columns}

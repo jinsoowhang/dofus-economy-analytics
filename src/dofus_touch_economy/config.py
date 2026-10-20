@@ -19,8 +19,15 @@ class Settings:
     bigquery_datasets: tuple[str, ...] = ("dofus_dev", "dofus_prod")
     public_origin: str | None = None
     dofus_database_path: Path | None = None
+    accounts_enabled: bool = False
+    owner_email: str | None = None
+    invite_mail_config: Path | None = None
 
     def __post_init__(self) -> None:
+        if self.accounts_enabled and (
+            self.public_origin is None or not self.owner_email or "@" not in self.owner_email
+        ):
+            raise ValueError("Accounts require DOFUS_PUBLIC_ORIGIN and DOFUS_OWNER_EMAIL")
         if self.public_origin is None:
             return
         parsed = urlsplit(self.public_origin)
@@ -98,6 +105,13 @@ class Settings:
             dofus_database_path=(
                 (project_root / Path(os.environ["DOFUS_PC_DATABASE_PATH"])).resolve()
                 if os.environ.get("DOFUS_PC_DATABASE_PATH", "").strip()
+                else None
+            ),
+            accounts_enabled=os.environ.get("DOFUS_ACCOUNTS_ENABLED", "false").lower() == "true",
+            owner_email=os.environ.get("DOFUS_OWNER_EMAIL", "").strip().lower() or None,
+            invite_mail_config=(
+                Path(os.environ["DOFUS_INVITE_MAIL_CONFIG"])
+                if os.environ.get("DOFUS_INVITE_MAIL_CONFIG")
                 else None
             ),
         )

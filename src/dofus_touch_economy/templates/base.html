@@ -3,14 +3,15 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% if request.app.state.settings.accounts_enabled %}<meta name="htmx-config" content='{"historyCacheSize":0}'>{% endif %}
     <title>{% block title %}Dofus Economy{% endblock %} · {{ world.game_label }} · {{ world.server }}</title>
     <link rel="stylesheet" href="/static/app.css?v=20261017-worlds">
     <script src="/static/htmx.min.js" defer></script>
-    <script src="/static/world-selection.js?v=20261017" defer></script>
+    <script src="/static/world-selection.js?v=20261018-accounts" defer></script>
     <script src="/static/table-sort.js?v=20260909-recipe-order" defer></script>
     <script src="/static/site-navigation.js" defer></script>
   </head>
-  <body data-world="{{ world.key }}">
+  <body data-world="{{ world.key }}" data-account="{{ request.state.account.id }}" data-accounts-enabled="{{ 'true' if request.app.state.settings.accounts_enabled else 'false' }}"{% if request.app.state.settings.accounts_enabled %} hx-history="false"{% endif %}>
     <header class="site-header">
       <div class="site-header-inner">
         <a href="/" class="site-brand">Dofus Economy</a>
@@ -87,12 +88,13 @@
             </div>
           </details>
           <details class="site-menu">
-            <summary class="site-tab{% if active_tab in ['bigquery_sync', 'dashboard', 'insights'] %} is-active{% endif %}">
+            <summary class="site-tab{% if active_tab in ['access_requests', 'bigquery_sync', 'dashboard', 'insights'] %} is-active{% endif %}">
               <span>Data</span>
               <span class="site-menu-caret" aria-hidden="true">&#9662;</span>
             </summary>
             <div class="site-submenu" role="group" aria-label="Data navigation">
-              <a href="/bigquery-sync" class="site-submenu-link{% if active_tab == 'bigquery_sync' %} is-active{% endif %}"{% if active_tab == 'bigquery_sync' %} aria-current="page"{% endif %}>BigQuery Sync</a>
+              {% if request.app.state.settings.accounts_enabled and request.state.account.is_admin %}<a href="/admin/access-requests" class="site-submenu-link{% if active_tab == 'access_requests' %} is-active{% endif %}">Access requests</a>{% endif %}
+              {% if request.state.account.is_admin %}<a href="/bigquery-sync" class="site-submenu-link{% if active_tab == 'bigquery_sync' %} is-active{% endif %}"{% if active_tab == 'bigquery_sync' %} aria-current="page"{% endif %}>BigQuery Sync</a>{% endif %}
               <a href="/dashboard" class="site-submenu-link{% if active_tab == 'dashboard' %} is-active{% endif %}"{% if active_tab == 'dashboard' %} aria-current="page"{% endif %}>Dashboard</a>
               <a href="/insights" class="site-submenu-link{% if active_tab == 'insights' %} is-active{% endif %}"{% if active_tab == 'insights' %} aria-current="page"{% endif %}>Insights</a>
             </div>

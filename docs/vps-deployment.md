@@ -1,9 +1,11 @@
 # VPS hosting with Google sign-in
 
-This deployment keeps the source public and the operational website private. Only
-verified Google accounts named in a private allowlist may use the website, icons,
-or API. Every allowed account has full access to the same single-user database;
-this is not a multi-tenant application.
+This deployment keeps the source public and operational records behind Google
+sign-in and account approval. Anyone may sign in to request access. Pending users
+see their request status; approved users share market prices within each game/server
+and access only their own listings, sales, profits, and personal reports. The owner
+manages approvals and price corrections without a page for other users' Sales.
+See [ADR 0005](adr/0005-isolate-user-economies.md).
 
 ```text
 Browser -> HTTPS / Nginx Proxy Manager -> OAuth2 Proxy -> FastAPI -> SQLite
@@ -12,8 +14,8 @@ Browser -> HTTPS / Nginx Proxy Manager -> OAuth2 Proxy -> FastAPI -> SQLite
 ```
 
 Nginx Proxy Manager (NPM) owns the certificate and HTTP-to-HTTPS redirect. OAuth2
-Proxy owns Google authentication, account authorization, OAuth state, and secure
-session cookies. Neither container publishes an application or authentication
+Proxy owns Google authentication, OAuth state, and secure session cookies. FastAPI
+owns account approval and private-data authorization. Neither container publishes an application or authentication
 port. The authentication container and public information service join the existing
 NPM Docker network; FastAPI joins the application network. Keep NPM's admin UI private.
 
@@ -48,7 +50,7 @@ https://economy.example.com/oauth2/callback
 The redirect URI must match exactly. Use only `openid email profile` scopes; no
 Gmail inbox permission is needed. During External/Testing configuration, add the
 owner as a test user. Production status and Google's consent-screen requirements
-are separate from this application's email allowlist. Follow Google's
+are separate from this application's account approvals. Follow Google's
 [web-server OAuth instructions](https://developers.google.com/identity/protocols/oauth2/web-server)
 and OAuth2 Proxy's [Google provider documentation](https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/google/).
 
@@ -86,7 +88,7 @@ chmod 600 /etc/dofus-touch-economy/app.env
 ```
 
 Edit `app.env` with the selected hostname, actual market context, Google web
-client ID, NPM network name, and NPM container IPv4 address. Inspect the existing
+client ID, `DOFUS_OWNER_EMAIL`, NPM network name, and NPM container IPv4 address. Inspect the existing
 network rather than assigning a new address or opening another firewall port:
 
 ```bash
@@ -99,46 +101,51 @@ setting if NPM is recreated with another address. The proxy's official
 [configuration reference](https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/)
 explains the forwarded-header trust boundary.
 
-Create the private allowlist and secrets:
+Create `google_client_secret` and `cookie_secret` under the private secrets
+directory. Preserve existing valid secrets. The Google secret file contains only
+the Web client's secret, without a trailing newline; the cookie secret contains
+32 random bytes. Set both to mode 0600 and UID/GID 65532 for OAuth2 Proxy.
 
-```bash
-python3 - <<'PY'
-import getpass
-import os
-from pathlib import Path
+Create `invite_mail_config.json` in that same directory with the SMTP settings:
 
-directory = Path('/etc/dofus-touch-economy/secrets')
-email = getpass.getpass('Allowed Google email: ').strip().lower()
-secret = getpass.getpass('Google web client secret: ').strip()
-if '@' not in email or '\n' in email or not secret:
-    raise SystemExit('An email and client secret are required')
-values = {
-    'allowed_emails': (email + '\n').encode(),
-    'google_client_secret': secret.encode(),
-    'cookie_secret': os.urandom(32),
+```json
+{
+  "host": "smtp.example.test",
+  "port": 587,
+  "username": "mailer@example.test",
+  "password": "replace-with-private-smtp-password",
+  "from_address": "mailer@example.test",
+  "implicit_tls": false
 }
-for name, value in values.items():
-    path = directory / name
-    if path.exists():
-        if name == 'cookie_secret':
-            if len(path.read_bytes()) != 32:
-                raise SystemExit('Existing cookie secret must contain 32 bytes')
-        elif path.read_bytes() != value:
-            raise SystemExit(f'Existing {name} differs; rotate it explicitly')
-    else:
-        with path.open('xb') as handle:
-            handle.write(value)
-    path.chmod(0o600)
-    os.chown(path, 65532, 65532)
-PY
 ```
 
-OAuth2 Proxy runs as UID 65532, which must be able to read the bind-mounted secret
-files. Their parent directory stays root-only on the host. Compose mounts the
-files read-only into that service; the application receives no OAuth secrets.
-Compose secrets are local files, not an encrypted vault. Include their storage in
-your server access and backup policy. Do not set `email_domains=*` or
-`email_domains=gmail.com`; either would bypass the owner-only allowlist.
+Use STARTTLS on 587, or `implicit_tls: true` on 465. The app always verifies TLS
+certificates. Gmail SMTP requires a Gmail app password; the Google sign-in OAuth
+credential does not authorize sending email. Store this JSON as mode 0600 owned by
+UID/GID 10001. It is mounted only into the app as a read-only secret. Do not put
+real values in Git or shell history. A temporary `{}` file permits testing the
+saved-request path, but actual delivery must be configured and verified before
+claiming the invite-email workflow is complete.
+
+The private owner email is set through `DOFUS_OWNER_EMAIL` in `app.env`. The app
+bootstraps the reserved `owner` account and binds it to the first verified Google
+subject matching that address. Existing economy rows migrate to this account.
+Other accounts are identified by their stable Google subjects and start pending.
+Approvals, denial, and failed-email retries are available at
+`/admin/access-requests` only to the owner. Failed notifications remain saved and
+retry at most once per ten minutes; a successful SMTP submission is not resent by
+page refresh. An SMTP acceptance/crash boundary can cause a later retry, so delivery
+is at-least-once rather than an exact-once mail guarantee.
+
+OAuth2 Proxy uses `--email-domain=*` to authenticate access applicants. Admission
+is enforced in the app, replacing the old gateway email allowlist. Keep
+`--pass-user-headers=true`, `--prefer-email-to-user=false`, and
+`--skip-auth-strip-headers=true`: the gateway strips caller-supplied identity and
+sets `X-Forwarded-User` to the Google subject and `X-Forwarded-Email` to its verified
+email. Never expose the app's port or attach it to the public proxy network.
+Those identity headers are trusted only on the isolated app/authentication network;
+a directly exposed app could be impersonated. Neither Google tokens nor the Google
+client secret is passed to the app. Only the SMTP secret is mounted there.
 
 ## Preserve operational state and choose the authoritative database
 
@@ -154,7 +161,18 @@ and transfer that backup over SSH as
 `/var/lib/dofus-touch-economy/dofus_touch.sqlite3`. Do not copy only the live `.sqlite3`
 file while WAL writes are active. Transfer `data/app/item_icons/` separately to
 `/var/lib/dofus-touch-economy/item_icons/`; icons are not stored in SQLite. Keep an
-untouched pre-cutover backup and compare table counts and integrity after transfer.
+untouched pre-cutover backup and compare table contents and integrity after transfer.
+Repeat online backup, migration, and verification for `dofus_tal_kasha.sqlite3`.
+The icon directory contains both worlds’ UUID-addressed icons. Rehearse revision
+`0012` on backup copies first and confirm that every legacy listing/capture owner
+and price contributor is `owner`, with all preexisting values unchanged.
+If sign-in was tested against disposable databases, stop the gateway and app before
+cutover and preserve the central `user_accounts` registry from that Touch database.
+Copy its verified owner binding, access decisions, and notification state into the
+migrated production Touch backup before restarting. Check both disposable worlds
+for operational writes and resolve any real records before replacing them; only
+known synthetic verification rows may be discarded. The PC database must not gain
+an independent account registry. Keep the pre-cutover copies for rollback.
 Change transferred state ownership to UID/GID 10001 before starting the app:
 
 ```bash
@@ -172,6 +190,7 @@ From the checkout on the VPS:
 docker compose --env-file /etc/dofus-touch-economy/app.env -f deploy/compose.yml -f deploy/compose.public.yml config --quiet
 docker compose --env-file /etc/dofus-touch-economy/app.env -f deploy/compose.yml -f deploy/compose.public.yml build app
 docker compose --env-file /etc/dofus-touch-economy/app.env -f deploy/compose.yml -f deploy/compose.public.yml run --rm app alembic upgrade head
+docker compose --env-file /etc/dofus-touch-economy/app.env -f deploy/compose.yml -f deploy/compose.public.yml run --rm -e DOFUS_APP_DATABASE_PATH=data/app/dofus_tal_kasha.sqlite3 app alembic upgrade head
 docker compose --env-file /etc/dofus-touch-economy/app.env -f deploy/compose.yml -f deploy/compose.public.yml up -d --wait
 ```
 
@@ -195,7 +214,12 @@ Before cutover, verify:
 
 - Unauthenticated pages, icons, and OpenAPI redirect to Google; API routes return
   401. Spoofed email/Authorization headers do not bypass authentication.
-- The allowlisted Gmail account signs in; a different Google account is denied.
+- The configured owner signs in and sees their own data. A second Google account
+  sees the request screen, one email reaches the owner, approval unlocks an empty
+  private economy with shared prices, and denial revokes access immediately.
+- Two approved accounts cannot read/count/change each other’s listings or reports,
+  even with known UUIDs or stale tabs. Administrators have no Sales bypass.
+  The API, assets, icons, and OpenAPI remain blocked for pending/denied accounts.
 - The original items, prices, recipes, and sales are intact. A deliberate test
   write persists through an app restart, and cross-origin/missing-origin writes
   are denied. Use synthetic state when testing mutations before cutover.
@@ -206,7 +230,9 @@ Before cutover, verify:
   appear in public logs or Git changes.
 
 The app healthcheck checks HTTP availability; verify SQLite integrity and schema
-separately. BigQuery Sync remains manual. The base deployment intentionally does
+separately. BigQuery Sync remains manual and owner-only; the existing Sales export contains
+only the original owner’s rows, with anonymous common prices. Account records,
+contributor keys, other users’ private notes, and other users’ Sales are excluded. The base deployment intentionally does
 not mount Google Cloud credentials; configure least-privilege credentials outside
 Git separately if that feature is required on the VPS.
 

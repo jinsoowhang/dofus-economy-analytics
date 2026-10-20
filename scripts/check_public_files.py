@@ -50,6 +50,7 @@ FORBIDDEN_NAMES = {
     "allowed_emails",
     "google_client_secret",
     "cookie_secret",
+    "invite_mail_config.json",
     "credentials.json",
 }
 

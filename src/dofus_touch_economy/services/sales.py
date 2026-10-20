@@ -895,6 +895,13 @@ class SalesService:
         for listing in listings:
             asking_price = price_corrections.get(listing.uuid)
             if asking_price is None or asking_price == listing.asking_price:
+                if listing.asking_price is not None:
+                    self._new_price_observation(
+                        listing.item_id,
+                        listing.asking_price,
+                        resolved_sold_at,
+                        source="sale_completed",
+                    )
                 continue
             observation = self._new_price_observation(
                 listing.item_id,

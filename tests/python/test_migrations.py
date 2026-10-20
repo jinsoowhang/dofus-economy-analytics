@@ -63,6 +63,7 @@ def test_migrations_preserve_populated_database_and_downgrade(tmp_path: Path) ->
     )
     assert set(inspect(engine).get_table_names()) == {
         "alembic_version",
+        "user_accounts",
         "import_batches",
         "items",
         "price_observations",

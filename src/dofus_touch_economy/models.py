@@ -5,6 +5,7 @@ from decimal import Decimal
 from uuid import UUID, uuid4
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     DateTime,
     ForeignKey,
@@ -211,6 +212,7 @@ class PriceObservation(Base):
     )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    contributor_id: Mapped[str] = mapped_column(String(40), default="owner", nullable=False)
     uuid: Mapped[UUID] = mapped_column(Uuid, default=uuid4, unique=True, nullable=False)
     item_id: Mapped[int] = mapped_column(
         ForeignKey("items.id", ondelete="RESTRICT"), nullable=False
@@ -234,7 +236,13 @@ class PriceObservation(Base):
     )
 
 
-class SaleListing(Base):
+class PrivatelyOwned:
+    """Opaque account key; accounts are registered in the default world database."""
+
+    owner_id: Mapped[str] = mapped_column(String(40), default="owner", nullable=False, index=True)
+
+
+class SaleListing(PrivatelyOwned, Base):
     __tablename__ = "sale_listings"
     __table_args__ = (
         UniqueConstraint(
@@ -295,7 +303,7 @@ class SaleListing(Base):
     )
 
 
-class SaleCaptureBatch(Base):
+class SaleCaptureBatch(PrivatelyOwned, Base):
     __tablename__ = "sale_capture_batches"
     __table_args__ = (
         UniqueConstraint(
@@ -376,7 +384,7 @@ class SaleCaptureBatch(Base):
     )
 
 
-class SaleCaptureFile(Base):
+class SaleCaptureFile(PrivatelyOwned, Base):
     __tablename__ = "sale_capture_files"
     __table_args__ = (
         UniqueConstraint(
@@ -421,7 +429,7 @@ class SaleCaptureFile(Base):
     capture_batch: Mapped[SaleCaptureBatch] = relationship(back_populates="files")
 
 
-class SaleCaptureListingAction(Base):
+class SaleCaptureListingAction(PrivatelyOwned, Base):
     __tablename__ = "sale_capture_listing_actions"
     __table_args__ = (
         UniqueConstraint(
@@ -456,3 +464,22 @@ class SaleCaptureListingAction(Base):
 
     capture_batch: Mapped[SaleCaptureBatch] = relationship(back_populates="listing_actions")
     sale_listing: Mapped[SaleListing] = relationship(back_populates="capture_actions")
+
+
+class UserAccount(Base):
+    """Central approval registry; only the default world's copy is used."""
+
+    __tablename__ = "user_accounts"
+    __table_args__ = (
+        CheckConstraint("status IN ('pending', 'approved', 'denied')", name="ck_account_status"),
+    )
+
+    id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    google_subject: Mapped[str | None] = mapped_column(String(255), unique=True)
+    email: Mapped[str] = mapped_column(String(320), unique=True, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), default="pending", nullable=False)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    requested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    notification_attempted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    notification_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Access requests{% endblock %}
+{% block content %}
+<h1>Access requests</h1>
+<p>Approve accounts to let people manage their own economy and contribute shared market prices. Personal sales and reports stay private.</p>
+<div class="item-table-wrap">
+  <table class="price-history-table">
+    <thead><tr><th>Account</th><th>Status</th><th>Request email</th><th>Actions</th></tr></thead>
+    <tbody>
+      {% for account in accounts %}
+      <tr>
+        <td>{{ account.email }}</td><td>{{ account.status | capitalize }}</td>
+        <td>{{ 'Sent' if account.notification_sent else 'Pending' }}</td>
+        <td>
+          {% for action, label in [('approve', 'Approve'), ('deny', 'Deny')] %}
+          {% if (action == 'approve' and account.status != 'approved') or (action == 'deny' and account.status != 'denied') %}
+          <form class="inline-form" method="post" action="/admin/access-requests/{{ account.id }}/{{ action }}">
+            <input type="hidden" name="account_id" value="{{ request.state.account.id }}">
+            <button type="submit">{{ label }}</button>
+          </form>
+          {% endif %}
+          {% endfor %}
+          {% if account.status == 'pending' and not account.notification_sent %}
+          <form class="inline-form" method="post" action="/admin/access-requests/{{ account.id }}/retry-email">
+            <input type="hidden" name="account_id" value="{{ request.state.account.id }}">
+            <button type="submit">Retry email</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4">No access requests yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

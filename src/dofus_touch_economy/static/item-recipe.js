@@ -7,8 +7,9 @@ if (recipeCraftQuantity && recipeTotalCostPreview) {
   const kamaFormatter = new Intl.NumberFormat("en-US", {
     maximumFractionDigits: 20,
   });
-  const quantityStorageKey =
-    `dofus-item-recipe-craft-quantity-v1:${recipeCraftQuantity.dataset.itemUuid}`;
+  const quantityStorageKey = window.economyStorageKey(
+    `dofus-item-recipe-craft-quantity-v1:${recipeCraftQuantity.dataset.itemUuid}`,
+  );
   const quantityCells = document.querySelectorAll(".recipe-scaled-quantity");
   const totalCostCells = document.querySelectorAll(".recipe-scaled-total-cost");
 
