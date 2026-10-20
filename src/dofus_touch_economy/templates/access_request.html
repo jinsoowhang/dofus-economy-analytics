@@ -4,10 +4,13 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Account access · Dofus Economy</title>
-    <style>body{font:1rem system-ui,sans-serif;max-width:40rem;margin:12vh auto;padding:1.5rem;line-height:1.6}a{color:#276541}</style>
+    <style>body{font:1rem system-ui,sans-serif;max-width:40rem;margin:12vh auto;padding:1.5rem;line-height:1.6}a{color:#276541}.access-header{display:flex;align-items:center;justify-content:space-between;gap:1rem}.access-sign-out{flex-shrink:0;border:1px solid currentColor;border-radius:.4rem;padding:.45rem .75rem;text-decoration:none}</style>
   </head>
   <body>
-    <h1>Dofus Economy</h1>
+    <header class="access-header">
+      <h1>Dofus Economy</h1>
+      <a href="/oauth2/sign_out?rd=%2F" class="access-sign-out">Sign out</a>
+    </header>
     {% if account.status == 'denied' %}
       <h2>Access has not been approved</h2>
       <p>Your account does not currently have access. Contact the website owner if you believe this is a mistake.</p>
@@ -19,6 +22,6 @@
       <p>Email notification is pending. The owner can see your request in Access requests. Your account is awaiting approval.</p>
     {% endif %}
     <p>Signed in as {{ account.email }}</p>
-    <p><a href="/">Check approval status</a> · <a href="/oauth2/sign_out">Sign out</a></p>
+    <p><a href="/">Check approval status</a></p>
   </body>
 </html>

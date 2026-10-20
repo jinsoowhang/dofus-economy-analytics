@@ -88,3 +88,67 @@
   then make the VPS the sole writer, including screenshot reconciliation.
 - Current private checkpoint: `data/reports/vps-deployment-2026-10-18/status.json`.
   Do not repeat already-completed local migrations or deploy from the older archive.
+
+## Public homepage and Sign out placement
+
+- The owner requested a homepage with an optional Google sign-in action instead
+  of immediately entering Google login, and Sign out at the right of the page.
+- Added a public static homepage at `/` with a **Sign in with Google** button,
+  brief product information, access-request guidance, and about/privacy links.
+  NPM checks the existing gateway session through an internal auth subrequest:
+  signed-out visitors see static public content, while valid sessions continue
+  through the full gateway to the existing private Home or account-approval page.
+  The internal check cannot be requested directly. Other operational paths and
+  assets retain their authentication and account-approval gates.
+- Moved Sign out outside primary navigation to the right of the game/server
+  controls. On mobile it sits at the top right with space reserved beside the
+  brand. Pending/denied accounts also receive a right-aligned header button.
+  Both buttons explicitly return to `/` after the gateway clears the session.
+- Verified all 79 focused hosted-security, account, Home, and static-asset tests;
+  repository Ruff lint/formatting, public-file policy, and whitespace checks pass.
+  Desktop/mobile browser checks cover 320–1440px, right-aligned controls, public
+  sign-in visibility, account switching, stale tabs, and no page overflow or script
+  errors. Visually reviewed the landing and mobile app screenshots privately.
+- Rehearsed the complete proxy configuration in isolated containers using the
+  actual NPM image, pinned login proxy, static service, and a synthetic upstream.
+  Verified public root responses, forged-cookie/header rejection, protected APIs
+  and assets, hidden internal session route, explicit Google login, a real signed
+  synthetic cookie reaching private Home, and logout clearing that cookie and
+  returning to the landing page. Removed the test containers and network.
+- This is a template, CSS, static-content, and proxy change. No application Python
+  behavior, database schema, operational records, or warehouse models changed;
+  the full analytics check script was not repeated after the earlier passing run.
+  Local SQLite remains authoritative, and the separate real Google/SMTP/live-data
+  cutover work remains pending.
+- Deployed the new app image, static homepage, and NPM routing after making private
+  source/image/database/route backups. No migrations or state replacements ran.
+  Nginx validation passes for both public service and NPM; the certificate and all
+  nine unrelated proxy hosts are preserved. Public HTTPS now returns 200 at `/`
+  without a login redirect, starts Google only from the sign-in action, clears
+  supplied session cookies on logout, and returns to the homepage. Other protected
+  pages/assets still redirect, APIs still return 401, forged identity/cookies do
+  not unlock them, and the internal auth path returns 404. Deployment and live
+  checks are in ignored `landing-ui-deploy.json` and `landing-live-https.json`.
+
+## Publish the pending work to GitHub
+
+- The owner requested pushing the pending work to the configured remote. Target:
+  `origin/main` at `jinsoowhang/dofus-economy-analytics`. Read-only remote inspection
+  confirmed its starting head matched the local base; no force push is required.
+- Split publication into three atomic commits: October 18 operational/session
+  records; approved private economies, account access requests, and related
+  documentation; then the public homepage and right-aligned Sign out controls.
+  Each feature commit includes its session record and durable memory updates.
+- Ran the complete `scripts/check.sh` against the final application tree: all
+  **515 Python tests** and **126 dbt build/test nodes** pass, along with Ruff,
+  formatting, compilation, SQL lint, and public-file policy. Independently exported
+  the account-isolation index before the homepage changes and verified all 89
+  focused account/security/Home/assets/snapshot/migration tests against that
+  intermediate commit using the existing locked environment without reinstalling.
+- Publication checks include intentional path staging, whitespace checks, a
+  complete-history Gitleaks scan with redacted private output, exact remote-head
+  verification after the normal push, and a clean working tree. Check logs and the
+  push result stay in ignored `data/reports/github-publication-2026-10-19/`.
+- No database write, data transfer, deployed-service change, BigQuery sync, or
+  external message is part of this GitHub publication. SMTP verification, real
+  owner/applicant Google sign-in, and final authoritative VPS cutover remain pending.

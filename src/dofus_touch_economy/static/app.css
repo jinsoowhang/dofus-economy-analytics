@@ -2422,6 +2422,19 @@ th.numeric .client-sort-header {
   flex-wrap: wrap;
   column-gap: 1.25rem;
   max-width: 100rem;
+  position: relative;
+}
+
+.site-sign-out {
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  color: var(--text);
+  flex-shrink: 0;
+  font-weight: 700;
+  margin: 0 0 0.65rem auto;
+  padding: 0.45rem 0.75rem;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .world-selector {
@@ -2456,6 +2469,19 @@ th.numeric .client-sort-header {
 }
 
 @media (max-width: 720px) {
+  .site-header-inner:has(.site-sign-out) .site-brand {
+    align-self: stretch;
+    min-height: 2.75rem;
+    padding-inline-end: 6rem;
+  }
+
+  .site-sign-out {
+    position: absolute;
+    inset-block-start: 0.8rem;
+    inset-inline-end: clamp(1rem, 4vw, 3rem);
+    margin: 0;
+  }
+
   .world-selector {
     margin-inline-start: 0;
   }

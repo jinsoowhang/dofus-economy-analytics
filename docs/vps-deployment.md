@@ -19,11 +19,16 @@ owns account approval and private-data authorization. Neither container publishe
 port. The authentication container and public information service join the existing
 NPM Docker network; FastAPI joins the application network. Keep NPM's admin UI private.
 
-The exact `/about`, `/privacy`, and `/public.css` paths are intentionally public.
-They are served by a separate static container with no application network,
-database, or secret mounts. The public homepage explains the app and links to its
-privacy policy so Google consent-screen branding can be configured before login
-is ready. Every operational route and asset remains behind authentication.
+Signed-out visitors to `/` see a public homepage with a **Sign in with Google**
+button. A valid gateway session continues to the account-approved Home checklist
+at the same address. Sign out sits at the right of the application header and
+returns to the public homepage after clearing the login session.
+
+The homepage and exact `/about`, `/privacy`, and `/public.css` paths are served by
+a separate static container with no application network, database, or secret mounts.
+NPM uses an internal session-check subrequest only to choose which root page to
+serve; private requests still pass through the full login gateway and application
+approval checks. Every operational record and asset remains behind authentication.
 
 Hosted writes require an Origin header matching the exact configured HTTPS origin,
 or a matching Referer when Origin is absent. Cross-site Fetch Metadata is denied.
@@ -206,14 +211,19 @@ logging OAuth callback query strings. Do not add an authentication exemption for
 static assets, icons, OpenAPI, HTML, or API routes. OAuth2 Proxy's own login and
 health endpoints do not expose application data.
 
-The three explicit branding paths above are the sole public-content exceptions.
-Use exact NPM locations; broad bypasses such as `/static/` or `/api/` are not part
-of this design.
+Only the signed-out root homepage and three exact branding paths above serve
+public content. The `/_dofus_session` location is internal and returns 404 to direct
+requests. Use the complete NPM configuration; broad bypasses such as `/static/`
+or `/api/` are not part of this design.
 
 Before cutover, verify:
 
-- Unauthenticated pages, icons, and OpenAPI redirect to Google; API routes return
-  401. Spoofed email/Authorization headers do not bypass authentication.
+- A signed-out visit to `/` returns the public homepage without redirecting to
+  Google. Its sign-in button starts Google login; signing out clears the session
+  and returns to that homepage. A valid session at `/` reaches the private Home
+  checklist or pending-access screen, according to account approval.
+- Other unauthenticated operational pages, icons, and OpenAPI redirect to Google;
+  API routes return 401. Spoofed email/Authorization headers do not bypass authentication.
 - The configured owner signs in and sees their own data. A second Google account
   sees the request screen, one email reaches the owner, approval unlocks an empty
   private economy with shared prices, and denial revokes access immediately.

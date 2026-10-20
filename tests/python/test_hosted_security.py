@@ -73,7 +73,7 @@ def test_hosted_read_remains_usable_and_rejects_untrusted_host(hosted_client) ->
     response = hosted_client.get("/")
     assert response.status_code == 200
     assert 'href="/privacy"' in response.text
-    assert 'href="/oauth2/sign_out"' in response.text
+    assert 'href="/oauth2/sign_out?rd=%2F" class="site-sign-out"' in response.text
     assert hosted_client.get("/", headers={"host": "other.example.test"}).status_code == 400
 
 

@@ -14,6 +14,9 @@ a { color: #17638c; text-underline-offset: .2em; }
 a:focus-visible { outline: 3px solid #17638c; outline-offset: 4px; }
 .eyebrow { color: #17638c; font-size: .85rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .intro { font-size: 1.15rem; color: #526475; }
+.sign-in-button { display: inline-block; padding: .7rem 1.1rem; background: #17638c; color: #fff; border-radius: .5rem; font-weight: 700; text-decoration: none; }
+.sign-in-button:hover { background: #114d6e; }
+.access-note { color: #526475; font-size: .9rem; }
 section { margin-top: 2rem; }
 li + li { margin-top: .4rem; }
 footer { border-top: 1px solid #dce3ec; margin-top: 2.5rem; padding-top: 1.5rem; font-size: .9rem; color: #526475; }
@@ -27,6 +30,6 @@ code { overflow-wrap: anywhere; }
   :root { color: #e2e9f0; background: #101923; }
   main { background: #172430; border-color: #35495d; }
   a, .eyebrow { color: #7fc7ee; }
-  .intro, footer { color: #b1c1d0; }
+  .intro, .access-note, footer { color: #b1c1d0; }
   footer { border-color: #35495d; }
 }

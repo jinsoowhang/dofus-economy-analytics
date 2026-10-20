@@ -23,6 +23,13 @@
   into atomic commits on `origin/main`. The full local check passes 496 Python
   tests and all 126 dbt build/test nodes. Operational databases, imported game
   data, icons, credentials, and private verification reports remain ignored.
+- October 19 publication groups the outstanding October 18 operational/session
+  records, approved multi-user economies, and public homepage/Sign out changes into
+  three atomic commits targeting `origin/main`. The complete local check passes
+  515 Python tests and all 126 dbt build/test nodes. The account-isolation commit
+  also passes 89 focused tests from an independent index snapshot before the
+  homepage change. Private runtime configuration, databases, evidence, and reports
+  remain ignored. GitHub publication does not perform the pending live-data cutover.
 
 - The owner's modern Dofus / Tal Kasha professions are Hunter, Jeweller, and
   Shoemaker. Use those workspace-specific defaults for Today's Crafting Items
@@ -76,6 +83,14 @@
   The default Touch database centrally owns Google subject/email, approvals, and
   durable throttled notification state. The configured owner binds the reserved
   `owner` key on their first verified Google sign-in; other accounts start pending.
+- October 19 entry-page preference: signed-out visits to the hosted `/` show a
+  public homepage with an explicit **Sign in with Google** button. Valid gateway
+  sessions at the same URL continue to the existing private Home checklist or
+  account-approval screen. NPM's `/_dofus_session` auth subrequest is internal and
+  cannot be called directly. Other operational paths/assets retain authentication
+  and approval checks. Sign out sits at the far right of the app header, including
+  on mobile, and at the right of the pending/denied page header. Its explicit
+  `rd=/` clears the login session and returns to the public homepage.
 - Alembic `0012` is now applied to both authoritative local databases after fresh
   online backups, rehearsals, a write lock, and exact before/after comparisons.
   Every prior field is unchanged; the 827 sold and 203 active Touch listings,
@@ -108,7 +123,8 @@
 - October 18 hosting progress: the owner supplied a valid Google OAuth Web
   client with the exact public callback. Its secret is installed only in private
   VPS configuration. The domain now routes through the Google login gateway;
-  branding pages remain public, operational pages/assets redirect to Google, and
+  the signed-out homepage and branding pages remain public, other operational
+  pages/assets redirect to Google, and
   unauthenticated APIs return 401. Nine unrelated proxy hosts are unchanged.
   NPM's actual internal peer changed to `.3` after restart; the private config uses
   the inspected current peer, not the older `.2` preparation value.

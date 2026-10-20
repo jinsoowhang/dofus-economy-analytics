@@ -112,10 +112,13 @@ The VPS becomes the authoritative writer only after cutover.
 
 Exact public branding paths `/about`, `/privacy`, and `/public.css` use a separate
 static container with no application-network membership, database, or credential
-mounts. These pages support Google consent-screen requirements. NPM sends every
-other route to the Google login gateway. The initial public-pages-only deployment
-serves information at `/` and returns 404 for operational paths until authentication
-is configured. Public pages contain no observed operational records.
+mounts. Signed-out visitors also receive its public homepage at `/`, with an explicit
+Google sign-in button. An internal NPM session-check subrequest sends valid sessions
+through the full login gateway to the existing private Home checklist or account
+approval screen. All other operational routes go through the gateway. Signing out
+from the right of the application header clears the session and returns to the
+public homepage. The initial public-pages-only deployment returns 404 for operational
+paths until authentication is configured. Public pages contain no observed records.
 
 The shared page layout exposes Home, Item, Sales, and Data as top-level navigation.
 Data contains BigQuery Sync, Dashboard, and Insights. Menus open by click or keyboard and close
@@ -141,7 +144,7 @@ and Sales tables sort on the server while detail, calculator, out-of-stock, and 
 summary tables use one local typed sorter. Selection and action-only columns remain
 controls rather than misleading sort targets.
 
-Home (`/`) is the default landing page. Five aggregate SQLite reads provide live
+For approved accounts, Home (`/`) is the default application page. Five aggregate SQLite reads provide live
 sales/inventory context. Today's Crafting Items is checklist task 2, linking to
 the separate `/todays-crafting-items` page under Sales, which uses up to four
 bulk reads for current recipe economics and sales history.
