@@ -37,6 +37,37 @@
   containers, runtime configuration, and production data were untouched. Signed-in
   `/` continues to private Home; sign out to see the redesigned entry page.
 
+- October 20 workspace redesign extends that identity through the shared app
+  layout, navigation, Home, forms, tables, recipes/calculator, reports, Dashboard,
+  About/Privacy, and pending/denied access pages. Headers expose Light/Dark/System;
+  System follows OS changes, explicit choices override the OS and persist in the
+  browser, and open tabs synchronize. `dofus-economy-theme` is a browser-wide
+  appearance preference with no private account data; existing private browser
+  state remains account/world-scoped. The script runs before CSS to apply the
+  saved theme on first paint and works for the current page when storage is blocked.
+  Canonical `static/theme.js` loads through `/static/` locally and a dedicated
+  exact public `/theme.js` route on the VPS. The static service mounts it read-only
+  at `/etc/dofus-theme.js` and serves an explicit Nginx alias; do not nest a new
+  file mount under its read-only public directory. Public CSP allows same-origin
+  scripts without inline/external script access. Other operational assets remain
+  authenticated/approved. Production databases, owner registry, gateway, runtime
+  configuration, certificate, and nine unrelated proxy hosts were preserved.
+  The website remains `dofus.duchessnikki.com`; `dofus.nikki.com` redirects elsewhere
+  and was not treated as authorization for DNS or OAuth-hostname changes.
+  Private browser/proxy/deployment evidence is under
+  `data/reports/workspace-design-2026-10-20/`.
+
+- October 20 GitHub publication separates the Touch production-cutover record,
+  public sign-in redesign, and app-wide redesign/theme support into three atomic
+  commits targeting `origin/main`. The intermediate sign-in commit passes 61
+  focused tests from an independent index snapshot. A fresh full check passes
+  515 Python tests and all 126 dbt build/test nodes. The final application retains
+  its passing 152 browser layout cases and verified production theme behavior.
+  Source publication does not replace operational state or redeploy the website;
+  databases, icons, credentials, screenshots, and private reports remain ignored.
+  Publication checks and the push result are retained under ignored
+  `data/reports/github-publication-2026-10-20/`.
+
 - The owner requested renaming the repository and local project to
   `dofus-economy-analytics`. GitHub is now
   `jinsoowhang/dofus-economy-analytics`, and `origin` uses the new URL. The Python

@@ -24,7 +24,7 @@ button. A valid gateway session continues to the account-approved Home checklist
 at the same address. Sign out sits at the right of the application header and
 returns to the public homepage after clearing the login session.
 
-The homepage and exact `/about`, `/privacy`, and `/public.css` paths are served by
+The homepage and exact `/about`, `/privacy`, `/public.css`, and `/theme.js` paths are served by
 a separate static container with no application network, database, or secret mounts.
 NPM uses an internal session-check subrequest only to choose which root page to
 serve; private requests still pass through the full login gateway and application
@@ -74,7 +74,7 @@ DOFUS_PROXY_NETWORK=your_proxy_network docker compose -f deploy/compose.public.y
 
 Before OAuth credentials exist, an NPM host can forward to `dofus-public-pages`
 on HTTP port 8080 with a valid certificate and Force SSL. This service only serves
-its information pages and stylesheet; operational paths return 404. After login
+its information pages, stylesheet, and shared appearance script; operational paths return 404. After login
 is ready, point the host at `dofus-google-login:4180` and install the exact public
 location rules in `deploy/npm-advanced.conf`. Keep the static service running.
 
@@ -211,10 +211,18 @@ logging OAuth callback query strings. Do not add an authentication exemption for
 static assets, icons, OpenAPI, HTML, or API routes. OAuth2 Proxy's own login and
 health endpoints do not expose application data.
 
-Only the signed-out root homepage and three exact branding paths above serve
+Only the signed-out root homepage and the four exact public paths above serve
 public content. The `/_dofus_session` location is internal and returns 404 to direct
 requests. Use the complete NPM configuration; broad bypasses such as `/static/`
 or `/api/` are not part of this design.
+
+The public appearance script is mounted read-only from the application's
+`static/theme.js`, so public, pending-access, and approved pages use the same
+Light/Dark/System preference. It stores only a browser theme choice and grants no
+application access. Public CSP permits same-origin scripts and styles; inline and
+external scripts remain blocked. Operational assets under `/static/` retain their
+authentication and account-approval checks. Local application pages load the
+same script through the existing local `/static/` mount.
 
 Before cutover, verify:
 

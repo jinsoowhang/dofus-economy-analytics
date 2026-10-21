@@ -119,3 +119,96 @@
   manifest, rollback location, and HTTPS results live under ignored
   `data/reports/signin-design-2026-10-20/`. Signed-in visitors still reach private
   Home; sign out to see the new entry page.
+
+## Extend the design across the application and add a theme option
+
+- The owner approved the sign-in design, requested the rest of the pages receive
+  the same treatment, and added a dark-mode requirement. Success criteria: a
+  consistent visual identity across all pages; usable light/dark/system choices;
+  preserved workflows, data, world/account isolation, and public access boundaries;
+  responsive and browser verification followed by a production UI-only deployment.
+- The owner wrote `dofus.nikki.com`; direct HTTPS inspection found it redirects to
+  an unrelated destination. Asked whether they intended the existing
+  `dofus.duchessnikki.com` site or a hostname move. Continued reversible local work
+  and, with no answer changing the existing scope, published to the established
+  app. No DNS, hostname, or OAuth callback changes were made.
+- Updated shared appearance tokens, the header/brand/navigation, workspace context,
+  page headings, cards, forms, tables, calculator, reports, Dashboard, and Home's
+  daily-routine banner. Public About/Privacy and pending-access pages now share
+  the visual language. Kept application actions, units, filtering, calculations,
+  and account/world pinning intact. Corrected Sales period navigation wrapping
+  found during tablet-width browser checks.
+- Added one canonical local `static/theme.js` and a reusable application theme
+  control. Light/Dark/System choices apply before CSS, persist in browser storage,
+  synchronize across tabs and page navigation, and retain explicit overrides when
+  the OS changes. System uses CSS media queries and follows OS changes naturally.
+  Storage denial still permits a temporary page-level choice. Appearance is a
+  browser-wide preference; private app state retains its existing account scopes.
+- Hosted public, pending, and approved pages load the same appearance script from
+  an exact public `/theme.js` route; local application pages use `/static/theme.js`.
+  Nginx serves a read-only mount at `/etc/dofus-theme.js` via an explicit alias.
+  Public CSP permits same-origin script loading; no inline/eval/external scripts
+  were enabled. `/static/`, APIs, and private records retain their login/approval
+  protections. Hosting and architecture docs explain this narrowly scoped asset.
+- Verification: `scripts/check.sh` passes all 515 Python tests and all 126 dbt
+  build/test nodes, lint/formatting, compilation, SQL lint, and public-file policy.
+  Final focused sets pass 89 app/security/world tests and 46 access/security tests.
+  JavaScript syntax and whitespace checks pass. No implementation-mirroring tests
+  were added to the suite; browser checks exercise actual theme behavior.
+- Browser QA covers 19 pages at 1440, 768, 390, and 320px in each theme: 152 cases
+  with no page overflow or browser errors. Also checked pending access at three
+  widths in both themes; calculator cart/calculation results; checklist persistence;
+  world switching; keyboard menus/focus; theme reload/navigation persistence;
+  cross-tab updates; OS-following and explicit override; invalid stored values;
+  and blocked local storage. Thirteen checked light/dark text color pairs exceed
+  4.5:1 contrast. Visually reviewed synthetic desktop/mobile screenshots.
+- An isolated proxy rehearsal using the real NPM image, pinned login/static
+  images, synthetic sessions, and final read-only static mount passes public-home,
+  public-theme, valid-session/private-Home, protected assets/APIs, forged identity,
+  hidden session route, explicit login, and logout checks. Removed its test
+  containers/network. No real account or operational rows were fabricated.
+- The first publication attempt exposed a nested file mount under the read-only
+  public directory. Automatic rollback restored the previous source/image/static
+  service; all services were healthy afterward. Changed the theme mount to the
+  standalone `/etc/` path, verified that exact pattern under a read-only root, and
+  successfully redeployed after fresh source/config/state backups. Retried new
+  source files only after confirming their hashes matched this task's prior attempt.
+- Final production verification renders all 15 approved application routes with
+  the theme control and confirms 827 sold and 203 active Touch listings, integrity,
+  foreign keys, and the preserved owner binding. No migrations or database
+  replacement ran. The gateway/runtime configuration/certificate and all nine
+  unrelated proxy hosts remain unchanged. The VPS remains the sole Touch writer;
+  hosted PC stays unchanged and local PC remains authoritative.
+- Private manifests, source/image/state rollback references, browser screenshots,
+  synthetic proxy checks, check logs, and deployment/live results are under ignored
+  `data/reports/workspace-design-2026-10-20/`. No commits or GitHub push were requested.
+- Final live HTTPS checks pass for all five public files/pages by exact source
+  checksum and six login/private-route boundaries. A fresh HTTPS browser verifies
+  saved dark mode across the public homepage/About/Privacy, mobile layout, explicit
+  light mode under a dark OS, and System following the OS, with no browser errors.
+
+## Publish the October 20 work to GitHub
+
+- The owner requested pushing the pending work to the configured remote:
+  `origin/main` at `jinsoowhang/dofus-economy-analytics`. Read-only remote inspection
+  confirmed its starting head matched the local base. Success criteria: atomic,
+  verified commits, normal push, exact remote/local head agreement, and a clean
+  working tree without private data or credentials entering Git.
+- Split the operational cutover record, public sign-in redesign, and shared
+  workspace redesign/theme support into three commits. Each feature includes its
+  corresponding project memory and session record. Prepared intermediate index
+  versions without overwriting the final working files.
+- Independently exported the sign-in commit's index and ran all 61 focused
+  hosted-security/Home/static-asset tests against that snapshot with the existing
+  locked environment. This verifies the intermediate commit before theme support.
+- Publication verification includes a fresh complete `scripts/check.sh`, pinned
+  Gitleaks complete-history scan with redacted private logs, intentional staging,
+  public-file policy, and working/staged whitespace checks. Check and push results
+  stay in ignored `data/reports/github-publication-2026-10-20/`.
+- The fresh complete check passes all 515 Python tests and 126 dbt build/test
+  nodes, Python lint/formatting/compilation, SQL lint, and public-file policy.
+  The existing Starlette/httpx deprecation warning remains unrelated.
+- This publication changes GitHub source/history only. It does not restart the
+  live services, replace either database, publish BigQuery data, or send messages.
+  The VPS remains Touch's authoritative writer; SMTP and the future PC cutover
+  retain their separate outstanding status.

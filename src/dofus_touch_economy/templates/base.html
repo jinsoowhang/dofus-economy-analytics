@@ -5,16 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% if request.app.state.settings.accounts_enabled %}<meta name="htmx-config" content='{"historyCacheSize":0}'>{% endif %}
     <title>{% block title %}Dofus Economy{% endblock %} · {{ world.game_label }} · {{ world.server }}</title>
-    <link rel="stylesheet" href="/static/app.css?v=20261019-sign-out">
+    <script src="{{ '/theme.js' if request.app.state.settings.public_origin else '/static/theme.js' }}?v=20261020"></script>
+    <link rel="stylesheet" href="/static/app.css?v=20261020-workspace">
     <script src="/static/htmx.min.js" defer></script>
     <script src="/static/world-selection.js?v=20261018-accounts" defer></script>
     <script src="/static/table-sort.js?v=20260909-recipe-order" defer></script>
     <script src="/static/site-navigation.js" defer></script>
   </head>
   <body data-world="{{ world.key }}" data-account="{{ request.state.account.id }}" data-accounts-enabled="{{ 'true' if request.app.state.settings.accounts_enabled else 'false' }}"{% if request.app.state.settings.accounts_enabled %} hx-history="false"{% endif %}>
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <header class="site-header">
       <div class="site-header-inner">
-        <a href="/" class="site-brand">Dofus Economy</a>
+        <a href="/" class="site-brand">
+          <svg class="site-brand-mark" viewBox="0 0 40 44" aria-hidden="true" focusable="false"><path d="M20 1 38 12v20L20 43 2 32V12Z" fill="currentColor"/><path d="m20 10 10 12-10 12L10 22Z" fill="#e2bc70"/><path d="m20 10 3 12-3 12-10-12Z" fill="#f7df9f"/></svg>
+          <span>Dofus <strong>Economy</strong></span>
+        </a>
         <nav class="site-tabs" aria-label="Primary navigation">
           <a href="/" class="site-tab{% if active_tab == 'home' %} is-active{% endif %}"{% if active_tab == 'home' %} aria-current="page"{% endif %}>Home</a>
           <details class="site-menu">
@@ -117,12 +122,14 @@
           </select>
           <button type="submit">Switch</button>
         </form>
+        {% include "partials/theme_control.html" %}
         {% if request.app.state.settings.public_origin %}
           <a href="/oauth2/sign_out?rd=%2F" class="site-sign-out">Sign out</a>
         {% endif %}
       </div>
     </header>
-    <main class="page-shell{% if active_tab in ['price_priorities', 'price_review', 'recipes', 'recipe_calculator', 'profit_opportunities', 'best_sellers', 'out_of_stock', 'daily_crafting', 'insights', 'dashboard'] %} page-shell--wide{% endif %}">
+    <main id="main-content" tabindex="-1" class="page-shell{% if active_tab in ['price_priorities', 'price_review', 'recipes', 'recipe_calculator', 'profit_opportunities', 'best_sellers', 'out_of_stock', 'daily_crafting', 'insights', 'dashboard'] %} page-shell--wide{% endif %}">
+      <div class="workspace-context"><span class="workspace-indicator" aria-hidden="true"></span>{{ world.game_label }} <span aria-hidden="true">/</span> {{ world.server }} <span class="workspace-context-label">Your economy workspace</span></div>
       {% if world.game == 'dofus' %}
         <aside class="world-benchmark-notice" role="note">
           <strong>Dofus · Tal Kasha</strong> — Starting prices may include matched Blair (Dofus Touch)
@@ -132,6 +139,7 @@
       {% endif %}
       {% block content %}{% endblock %}
     </main>
+    <footer class="workspace-footer"><span>Dofus Economy</span><span>Craft with a plan. Trade with a clearer picture.</span></footer>
     {% block scripts %}{% endblock %}
   </body>
 </html>

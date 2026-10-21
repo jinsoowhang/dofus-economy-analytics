@@ -36,9 +36,9 @@ code { overflow-wrap: anywhere; }
 
 /* Public sign-in: a crafting ledger beside one clear account action. */
 .landing {
-  color-scheme: light;
-  color: #223d35;
-  background: #f6f4ee;
+  color-scheme: inherit;
+  color: var(--public-text);
+  background: var(--public-background);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.55;
 }
@@ -55,7 +55,7 @@ code { overflow-wrap: anywhere; }
 .landing-header nav { display: flex; gap: 28px; font-size: 13px; font-weight: 500; }
 .landing-header nav a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; }
 .landing-header nav a:hover { text-decoration: underline; }
-.landing .signin-layout { width: min(1240px, calc(100% - 80px)); max-width: none; margin: 0 auto; padding: 0; display: grid; grid-template-columns: 1.08fr 1fr; gap: 0; background: #fffefa; border: 1px solid #e6e5db; border-radius: 24px; overflow: hidden; }
+.landing .signin-layout { width: min(1240px, calc(100% - 80px)); max-width: none; margin: 0 auto; padding: 0; display: grid; grid-template-columns: 1.08fr 1fr; gap: 0; background: var(--public-surface); border: 1px solid var(--public-border); border-radius: 24px; overflow: hidden; }
 .landing .story-panel { position: relative; margin: 0; padding: 48px 48px 30px; background: #153e35; color: #fbf7e8; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
 .story-contours { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .38; pointer-events: none; }
 .story-copy, .worlds-note { position: relative; }
@@ -80,25 +80,25 @@ code { overflow-wrap: anywhere; }
 .worlds-note > span:nth-child(2) { color: #e2bc70; font-size: 10px; }
 .landing .signin-panel { margin: 0; padding: 52px 56px 40px; align-self: center; min-width: 0; }
 .signin-panel:focus { outline: none; }
-.signin-eyebrow { margin: 0 0 14px; color: #647167; font-size: 9px; font-weight: 650; letter-spacing: 1.7px; }
+.signin-eyebrow { margin: 0 0 14px; color: var(--public-muted); font-size: 9px; font-weight: 650; letter-spacing: 1.7px; }
 .landing .signin-panel h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 43px; font-weight: 400; line-height: 1.12; letter-spacing: -1.4px; }
-.signin-description { margin: 18px 0 26px; color: #626c63; font-size: 14px; line-height: 1.65; }
+.signin-description { margin: 18px 0 26px; color: var(--public-muted); font-size: 14px; line-height: 1.65; }
 /* Google's HTML configurator uses this light button, logo, and font fallback. */
 .landing .google-signin { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 48px; padding: 12px; border: 1px solid #747775; border-radius: 6px; background: #fff; color: #1f1f1f; font-family: Roboto, Arial, sans-serif; font-size: 14px; font-weight: 500; letter-spacing: .25px; text-decoration: none; transition: box-shadow .18s, background-color .18s; }
 .google-signin svg { width: 20px; height: 20px; flex: none; }
 .landing .google-signin:hover { background: #f8f9f8; box-shadow: 0 1px 3px #24382b30; }
-.signin-reassurance { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 12px 0 0; color: #626c63; font-size: 10px; }
+.signin-reassurance { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 12px 0 0; color: var(--public-muted); font-size: 10px; }
 .signin-reassurance svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.3; flex: none; }
-.workspace-benefits { list-style: none; padding: 24px 0 0; margin: 26px 0 0; border-top: 1px solid #e6e7df; }
+.workspace-benefits { list-style: none; padding: 24px 0 0; margin: 26px 0 0; border-top: 1px solid var(--public-border); }
 .workspace-benefits li { display: flex; gap: 13px; align-items: center; margin: 0; }
 .workspace-benefits li + li { margin-top: 19px; }
-.benefit-icon { display: grid; place-items: center; width: 35px; height: 37px; flex: none; border: 1px solid #e3e8dc; border-radius: 9px; background: #f2f5ed; color: #45694f; }
+.benefit-icon { display: grid; place-items: center; width: 35px; height: 37px; flex: none; border: 1px solid var(--public-border); border-radius: 9px; background: var(--public-soft); color: var(--public-accent); }
 .benefit-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
 .landing h3 { margin: 0; font-size: 12px; line-height: 1.5; font-weight: 650; }
-.workspace-benefits p { margin: 3px 0 0; color: #626c63; font-size: 11px; line-height: 1.5; }
-.access-explainer { padding: 17px 18px; margin-top: 28px; background: #f1f3eb; border-radius: 9px; }
-.access-explainer p { margin: 5px 0 0; color: #626c63; font-size: 11px; line-height: 1.65; }
-.landing .landing-footer { display: flex; justify-content: space-between; gap: 20px; padding: 24px 0 28px; border: 0; font-size: 10px; color: #626c63; }
+.workspace-benefits p { margin: 3px 0 0; color: var(--public-muted); font-size: 11px; line-height: 1.5; }
+.access-explainer { padding: 17px 18px; margin-top: 28px; background: var(--public-soft); border-radius: 9px; }
+.access-explainer p { margin: 5px 0 0; color: var(--public-muted); font-size: 11px; line-height: 1.65; }
+.landing .landing-footer { display: flex; justify-content: space-between; gap: 20px; padding: 24px 0 28px; border: 0; font-size: 10px; color: var(--public-muted); }
 .landing-footer p { margin: 0; }
 
 @media (min-width: 1500px) {
@@ -155,4 +155,41 @@ code { overflow-wrap: anywhere; }
 @media (forced-colors: active) {
   .landing .google-signin, .example-ledger, .access-explainer { border: 1px solid CanvasText; }
   .story-contours, .craft-tokens { display: none; }
+}
+
+:root { color-scheme: light; --public-background: #f6f4ee; --public-surface: #fffefa; --public-text: #223d35; --public-muted: #626c63; --public-border: #d8ddd2; --public-soft: #eef2e8; --public-accent: #245c46; --public-input: #7d8d80; }
+:root[data-theme="dark"] { color-scheme: dark; --public-background: #101c18; --public-surface: #192a23; --public-text: #f1f0e3; --public-muted: #b7c5b8; --public-border: #3b5144; --public-soft: #22362b; --public-accent: #a1d2ae; --public-input: #829a87; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { color-scheme: dark; --public-background: #101c18; --public-surface: #192a23; --public-text: #f1f0e3; --public-muted: #b7c5b8; --public-border: #3b5144; --public-soft: #22362b; --public-accent: #a1d2ae; --public-input: #829a87; }
+}
+.theme-control { display: flex; align-items: center; gap: .5rem; font: 12px system-ui, sans-serif; color: var(--public-muted); white-space: nowrap; }
+.theme-control[hidden] { display: none; }
+.theme-control select { background: var(--public-surface); color: var(--public-text); border: 1px solid var(--public-input); border-radius: 6px; min-height: 38px; padding: 5px 8px; font: inherit; }
+.theme-control select:focus-visible { outline: 3px solid var(--public-accent); outline-offset: 3px; }
+.information-page { background: var(--public-background); color: var(--public-text); min-height: 100vh; }
+.information-header { display: flex; align-items: center; justify-content: space-between; gap: 1rem; max-width: 54rem; margin: auto; padding: 2rem 2.5rem 0; }
+.information-brand { font-size: 1.1rem; font-weight: 650; color: var(--public-text); text-decoration: none; }
+.information-page main { max-width: 49rem; margin: 2rem auto; padding: 2.5rem; background: var(--public-surface); border-color: var(--public-border); color: var(--public-text); }
+.information-page h1 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; letter-spacing: -1px; }
+.information-page h2 { margin-top: 2rem; font-size: 1.1rem; }
+.information-page a, .information-page .eyebrow { color: var(--public-accent); }
+.information-page .intro, .information-page footer { color: var(--public-muted); }
+.information-page footer { border-color: var(--public-border); }
+.access-page .access-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; max-width: 52rem; padding: 2rem; margin: auto; }
+.access-header .theme-control { margin-left: auto; }
+.access-sign-out { flex: none; border: 1px solid var(--public-input); border-radius: .5rem; padding: .5rem .75rem; text-decoration: none; font-size: .85rem; }
+.access-page .access-card { border-top: 3px solid var(--public-accent); }
+.access-card h1 { font-family: Georgia, "Times New Roman", serif; font-size: 2rem; font-weight: 400; line-height: 1.2; }
+.access-card p { overflow-wrap: anywhere; }
+@media (max-width: 760px) {
+  .landing-header { flex-wrap: wrap; padding-block: 15px; }
+  .landing-header nav { flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 12px; }
+  .landing-header nav .theme-control { flex-basis: 100%; justify-content: flex-end; padding-bottom: 4px; }
+  .landing-header:has(.theme-control:not([hidden])) { align-items: flex-start; }
+  .landing-header:has(.theme-control:not([hidden])) .brand { margin-top: 8px; }
+  .landing-header:has(.theme-control:not([hidden])) nav { max-width: 160px; }
+  .information-header { padding: 1.25rem 1rem 0; }
+  .information-page main { margin: 1.25rem 1rem; padding: 1.5rem; border: 1px solid var(--public-border); border-radius: 1rem; }
+  .access-page .access-header { padding: 1rem; }
+  .access-header .theme-control { order: 3; flex-basis: 100%; justify-content: flex-end; }
 }

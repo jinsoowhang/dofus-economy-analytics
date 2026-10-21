@@ -4,24 +4,29 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Account access · Dofus Economy</title>
-    <style>body{font:1rem system-ui,sans-serif;max-width:40rem;margin:12vh auto;padding:1.5rem;line-height:1.6}a{color:#276541}.access-header{display:flex;align-items:center;justify-content:space-between;gap:1rem}.access-sign-out{flex-shrink:0;border:1px solid currentColor;border-radius:.4rem;padding:.45rem .75rem;text-decoration:none}</style>
+    <script src="/theme.js?v=20261020"></script>
+    <link rel="stylesheet" href="/public.css">
   </head>
-  <body>
+  <body class="information-page access-page">
     <header class="access-header">
-      <h1>Dofus Economy</h1>
+      <a class="information-brand" href="/">Dofus Economy</a>
+      {% include "partials/theme_control.html" %}
       <a href="/oauth2/sign_out?rd=%2F" class="access-sign-out">Sign out</a>
     </header>
+    <main class="access-card">
+    <p class="eyebrow">Your economy starts here</p>
     {% if account.status == 'denied' %}
-      <h2>Access has not been approved</h2>
+      <h1>Access has not been approved</h1>
       <p>Your account does not currently have access. Contact the website owner if you believe this is a mistake.</p>
     {% elif account.notification_sent %}
-      <h2>Invite request has been sent</h2>
+      <h1>Invite request has been sent</h1>
       <p>Your request has been emailed to the website owner. You can use your own economy after your account is approved.</p>
     {% else %}
-      <h2>Your invite request has been saved</h2>
+      <h1>Your invite request has been saved</h1>
       <p>Email notification is pending. The owner can see your request in Access requests. Your account is awaiting approval.</p>
     {% endif %}
     <p>Signed in as {{ account.email }}</p>
     <p><a href="/">Check approval status</a></p>
+    </main>
   </body>
 </html>

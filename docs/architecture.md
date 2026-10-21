@@ -110,7 +110,7 @@ remain restricted to the original owner and exclude account/contributor keys and
 other contributors' private notes. See [ADR 0005](adr/0005-isolate-user-economies.md).
 The VPS becomes the authoritative writer only after cutover.
 
-Exact public branding paths `/about`, `/privacy`, and `/public.css` use a separate
+Exact public paths `/about`, `/privacy`, `/public.css`, and `/theme.js` use a separate
 static container with no application-network membership, database, or credential
 mounts. Signed-out visitors also receive its public homepage at `/`, with an explicit
 Google sign-in button. An internal NPM session-check subrequest sends valid sessions
