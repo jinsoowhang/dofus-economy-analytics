@@ -27,6 +27,16 @@
   disposable login-check state. Touch's later production cutover is recorded above.
   Matching source alone does not imply matching data.
 
+- October 20 public sign-in redesign uses forest green, ivory, gold, original
+  inline SVG crafting/coin artwork, and a clearly illustrative ledger beside the
+  Google sign-in panel. Mobile puts sign-in before the decorative story panel.
+  Google logo/button treatment follows its official HTML configurator. All new
+  styles are scoped to `.landing`, preserving About/Privacy styling. No external
+  assets/scripts, new public routes, CSP changes, or login-flow changes were needed.
+  Only `deploy/public/index.html` and `public.css` were deployed; app/gateway
+  containers, runtime configuration, and production data were untouched. Signed-in
+  `/` continues to private Home; sign out to see the redesigned entry page.
+
 - The owner requested renaming the repository and local project to
   `dofus-economy-analytics`. GitHub is now
   `jinsoowhang/dofus-economy-analytics`, and `origin` uses the new URL. The Python

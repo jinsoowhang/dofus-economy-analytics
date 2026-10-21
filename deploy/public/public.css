@@ -33,3 +33,126 @@ code { overflow-wrap: anywhere; }
   .intro, .access-note, footer { color: #b1c1d0; }
   footer { border-color: #35495d; }
 }
+
+/* Public sign-in: a crafting ledger beside one clear account action. */
+.landing {
+  color-scheme: light;
+  color: #223d35;
+  background: #f6f4ee;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.55;
+}
+.landing *, .landing *::before, .landing *::after { box-sizing: border-box; }
+.landing a { color: inherit; }
+.landing a:focus-visible { outline: 3px solid #92691f; outline-offset: 5px; }
+.landing .skip-link { position: absolute; top: -6rem; left: 1rem; z-index: 5; padding: .75rem 1rem; background: #fff; }
+.landing .skip-link:focus { top: 1rem; }
+.landing-header, .landing-footer { width: min(1240px, calc(100% - 80px)); margin: 0 auto; }
+.landing-header { min-height: 104px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.landing .brand { display: inline-flex; align-items: center; gap: 12px; font-size: 21px; letter-spacing: -.6px; text-decoration: none; }
+.brand-mark { width: 34px; height: 38px; flex: none; }
+.brand strong { font-weight: 650; }
+.landing-header nav { display: flex; gap: 28px; font-size: 13px; font-weight: 500; }
+.landing-header nav a { display: inline-flex; align-items: center; min-height: 44px; text-decoration: none; }
+.landing-header nav a:hover { text-decoration: underline; }
+.landing .signin-layout { width: min(1240px, calc(100% - 80px)); max-width: none; margin: 0 auto; padding: 0; display: grid; grid-template-columns: 1.08fr 1fr; gap: 0; background: #fffefa; border: 1px solid #e6e5db; border-radius: 24px; overflow: hidden; }
+.landing .story-panel { position: relative; margin: 0; padding: 48px 48px 30px; background: #153e35; color: #fbf7e8; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; }
+.story-contours { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .38; pointer-events: none; }
+.story-copy, .worlds-note { position: relative; }
+.story-eyebrow { margin: 0 0 30px; color: #e9d6a6; font-size: 10px; font-weight: 600; letter-spacing: 1.4px; text-transform: uppercase; }
+.story-eyebrow span { margin-right: 8px; font-size: 15px; }
+.landing h1 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp(44px, 4.6vw, 64px); font-weight: 400; line-height: 1.08; letter-spacing: -2.5px; }
+.landing h1 em { color: #efd28c; font-weight: 400; }
+.story-description { max-width: 350px; margin: 25px 0 0; color: #cad9ce; font-size: 15px; line-height: 1.7; }
+.ledger-scene { position: relative; margin: 24px -12px 0; min-height: 266px; display: grid; place-items: center; }
+.craft-tokens { position: absolute; inset: 0; width: 100%; height: 100%; }
+.example-ledger { position: relative; width: 288px; margin: 15px 0 0; padding: 20px 22px 15px; transform: rotate(-7deg); border: 1px solid #e9dfc4; border-radius: 12px; background: #fbf8ed; color: #32473e; box-shadow: 0 18px 35px #07251d66; }
+.ledger-heading { display: flex; align-items: center; gap: 6px; margin-bottom: 15px; font-size: 8px; font-weight: 700; letter-spacing: .8px; white-space: nowrap; }
+.ledger-icon { color: #7c641e; font-size: 19px; line-height: 1; }
+.example-tag { margin-left: auto; color: #627061; font-size: 8px; font-weight: 500; letter-spacing: 0; }
+.ledger-row { display: flex; justify-content: space-between; gap: 8px; padding: 7px 0; font-size: 11px; }
+.ledger-row > span:last-child { font-weight: 600; font-variant-numeric: tabular-nums; }
+.ledger-row small, .ledger-profit small { font-size: .8em; font-weight: 400; }
+.ledger-profit { margin-top: 10px; padding-top: 12px; border-top: 1px solid #d7ddce; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 10px; }
+.ledger-profit strong { color: #276349; font-size: 21px; letter-spacing: -.8px; }
+.ledger-scene figcaption { position: absolute; bottom: -5px; color: #c6d5ca; font-family: Georgia, "Times New Roman", serif; font-size: 14px; font-style: italic; }
+.worlds-note { display: flex; justify-content: center; gap: 17px; align-items: center; margin-top: 32px; font-size: 11px; letter-spacing: 1px; }
+.worlds-note > span:nth-child(2) { color: #e2bc70; font-size: 10px; }
+.landing .signin-panel { margin: 0; padding: 52px 56px 40px; align-self: center; min-width: 0; }
+.signin-panel:focus { outline: none; }
+.signin-eyebrow { margin: 0 0 14px; color: #647167; font-size: 9px; font-weight: 650; letter-spacing: 1.7px; }
+.landing .signin-panel h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 43px; font-weight: 400; line-height: 1.12; letter-spacing: -1.4px; }
+.signin-description { margin: 18px 0 26px; color: #626c63; font-size: 14px; line-height: 1.65; }
+/* Google's HTML configurator uses this light button, logo, and font fallback. */
+.landing .google-signin { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 48px; padding: 12px; border: 1px solid #747775; border-radius: 6px; background: #fff; color: #1f1f1f; font-family: Roboto, Arial, sans-serif; font-size: 14px; font-weight: 500; letter-spacing: .25px; text-decoration: none; transition: box-shadow .18s, background-color .18s; }
+.google-signin svg { width: 20px; height: 20px; flex: none; }
+.landing .google-signin:hover { background: #f8f9f8; box-shadow: 0 1px 3px #24382b30; }
+.signin-reassurance { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 12px 0 0; color: #626c63; font-size: 10px; }
+.signin-reassurance svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.3; flex: none; }
+.workspace-benefits { list-style: none; padding: 24px 0 0; margin: 26px 0 0; border-top: 1px solid #e6e7df; }
+.workspace-benefits li { display: flex; gap: 13px; align-items: center; margin: 0; }
+.workspace-benefits li + li { margin-top: 19px; }
+.benefit-icon { display: grid; place-items: center; width: 35px; height: 37px; flex: none; border: 1px solid #e3e8dc; border-radius: 9px; background: #f2f5ed; color: #45694f; }
+.benefit-icon svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.25; stroke-linecap: round; stroke-linejoin: round; }
+.landing h3 { margin: 0; font-size: 12px; line-height: 1.5; font-weight: 650; }
+.workspace-benefits p { margin: 3px 0 0; color: #626c63; font-size: 11px; line-height: 1.5; }
+.access-explainer { padding: 17px 18px; margin-top: 28px; background: #f1f3eb; border-radius: 9px; }
+.access-explainer p { margin: 5px 0 0; color: #626c63; font-size: 11px; line-height: 1.65; }
+.landing .landing-footer { display: flex; justify-content: space-between; gap: 20px; padding: 24px 0 28px; border: 0; font-size: 10px; color: #626c63; }
+.landing-footer p { margin: 0; }
+
+@media (min-width: 1500px) {
+  .landing-header { min-height: 130px; }
+  .landing .story-panel { padding: 56px 56px 38px; }
+  .landing .signin-panel { padding-top: 62px; padding-bottom: 52px; }
+}
+@media (max-width: 1050px) {
+  .landing-header, .landing .signin-layout, .landing .landing-footer { width: calc(100% - 48px); }
+  .landing .story-panel { padding: 38px 30px 28px; }
+  .landing .signin-panel { padding: 40px 32px 32px; }
+  .landing h1 { font-size: 48px; }
+  .landing .signin-panel h2 { font-size: 38px; }
+  .example-ledger { width: 260px; padding: 18px; }
+  .story-eyebrow { font-size: 9px; letter-spacing: 1px; }
+}
+@media (max-width: 760px) {
+  .landing-header, .landing .signin-layout, .landing .landing-footer { width: calc(100% - 32px); }
+  .landing-header { min-height: 80px; gap: 12px; }
+  .landing .brand { gap: 8px; font-size: 18px; }
+  .brand-mark { width: 28px; height: 32px; }
+  .landing-header nav { gap: 18px; font-size: 12px; }
+  .landing .signin-layout { display: flex; flex-direction: column; border-radius: 18px; }
+  .landing .signin-panel { order: -1; align-self: stretch; padding: 34px 30px 30px; }
+  .landing .signin-panel h2 { font-size: 38px; }
+  .signin-eyebrow { font-size: 8px; letter-spacing: 1.25px; }
+  .signin-description { margin: 16px 0 24px; }
+  .signin-description br { display: none; }
+  .workspace-benefits { margin-top: 22px; padding-top: 22px; }
+  .workspace-benefits li + li { margin-top: 17px; }
+  .access-explainer { margin-top: 24px; }
+  .landing .story-panel { padding: 36px 30px 28px; }
+  .story-eyebrow { margin-bottom: 22px; }
+  .landing h1 { font-size: clamp(41px, 8vw, 62px); letter-spacing: -1.8px; }
+  .story-description { max-width: 400px; }
+  .ledger-scene { max-width: 430px; width: 100%; align-self: center; margin: 18px 0 0; }
+  .example-ledger { width: 270px; }
+  .worlds-note { margin-top: 28px; }
+  .landing .landing-footer { flex-direction: column; gap: 6px; padding: 20px 8px 24px; text-align: center; }
+}
+@media (max-width: 370px) {
+  .landing-header nav { gap: 12px; }
+  .landing .brand { font-size: 16px; }
+  .landing .signin-panel, .landing .story-panel { padding-right: 22px; padding-left: 22px; }
+  .landing .signin-panel h2 { font-size: 35px; }
+  .example-ledger { width: 234px; padding: 17px 15px; }
+  .ledger-heading { font-size: 7px; }
+  .ledger-profit strong { font-size: 18px; }
+  .signin-reassurance { font-size: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing .google-signin { transition: none; }
+}
+@media (forced-colors: active) {
+  .landing .google-signin, .example-ledger, .access-explainer { border: 1px solid CanvasText; }
+  .story-contours, .craft-tokens { display: none; }
+}

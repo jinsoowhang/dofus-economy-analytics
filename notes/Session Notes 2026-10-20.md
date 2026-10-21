@@ -75,3 +75,47 @@
   pass; only project memory and today's session note are tracked changes.
 - SMTP remains unconfigured; request-email delivery and applicant approval testing
   remain separate outstanding work. Owner data access and Touch cutover are complete.
+
+## Research and improve the public sign-in page
+
+- The owner requested a less plain sign-in page and design research. Success
+  criteria: a distinct Dofus-appropriate visual identity, one clear Google action,
+  accurate access/privacy copy, responsive layout, accessible keyboard operation,
+  and a live static-only update that preserves the production Touch deployment.
+- Research informed these decisions:
+  - [NN/g login guidance](https://www.nngroup.com/articles/checklist-registration-login/)
+    recommends explaining registration benefits and minimizing input. Retained
+    one Google action and added short, concrete workspace benefits.
+  - [NN/g login-wall research](https://www.nngroup.com/articles/login-walls/)
+    supports explaining product value before requiring sign-in. The public page
+    illustrates crafting economics without exposing private operational records.
+  - [Google branding guidance](https://developers.google.com/identity/branding-guidelines)
+    and its official HTML configurator informed the light button, standard-color
+    logo, sign-in wording, spacing, and Roboto/Arial font fallback. The existing
+    gateway link remains unchanged; no Google SDK or external font was introduced.
+  - [W3C contrast guidance](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum)
+    informed legibility checks. All twelve checked text/focus color pairs exceed
+    4.5:1 contrast, with a minimum of 4.88:1; the primary action is at least 48px tall.
+- Implemented a forest-green/ivory/gold split layout, original inline SVG gem and
+  coin artwork, a clearly labeled illustrative crafting ledger, focused sign-in
+  panel, privacy reassurance, and truthful account-approval guidance. Mobile places
+  sign-in before the decorative panel. Added a working skip link and reduced-motion
+  and forced-colors handling. New CSS is scoped to `.landing`; existing public
+  About/Privacy content and styles remain intact.
+- Browser QA passes twelve width/color-scheme combinations from 320–1440px with
+  no overflow or browser/CSP errors. Verified visible mobile sign-in, primary touch
+  target, keyboard focus, skip-link-to-action sequence, unchanged Google redirect
+  destination, and existing information pages. No external asset requests occur.
+  Visually reviewed desktop/mobile screenshots under the ignored report directory.
+- All 61 existing focused hosted-security/Home/static-asset tests pass. Public-file
+  policy and whitespace checks pass. No new implementation-mirroring tests were
+  added. Full Python/analytics checks were not repeated for an HTML/CSS-only change.
+- Published only `deploy/public/index.html` and `deploy/public/public.css` after
+  backing up the previous public files. Exact checksums match the running static
+  service. App, gateway, and static-container IDs/start times remain unchanged;
+  runtime configuration and database files were not part of deployment. No NPM,
+  CSP, public-route, authentication, approval, or data-access changes were needed.
+- Private research snapshots, screenshots, browser/contrast checks, deployment
+  manifest, rollback location, and HTTPS results live under ignored
+  `data/reports/signin-design-2026-10-20/`. Signed-in visitors still reach private
+  Home; sign out to see the new entry page.

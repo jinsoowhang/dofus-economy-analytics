@@ -4,28 +4,119 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Track your Dofus crafting, market prices, and sales in your own private economy workspace.">
-    <title>Dofus Economy</title>
+    <meta name="theme-color" content="#153e35">
+    <title>Sign in · Dofus Economy</title>
     <link rel="stylesheet" href="/public.css">
   </head>
-  <body>
-    <main>
-      <p class="eyebrow">Dofus Economy</p>
-      <h1>Your crafting. Your sales. A clearer picture.</h1>
-      <p class="intro">Plan your next craft, follow market prices, and see how your sales are doing across Dofus Touch and Dofus.</p>
-      <p><a class="sign-in-button" href="/oauth2/start?rd=%2F">Sign in with Google</a></p>
-      <p class="access-note">New here? Sign in to request access. Once approved, you’ll have your own private listings, sales history, and reports.</p>
-      <section aria-labelledby="features">
-        <h2 id="features">Make every craft count</h2>
-        <ul>
-          <li>Find items and recipes, compare ingredient costs, and estimate profit.</li>
-          <li>Track active listings and completed sales in your own workspace.</li>
-          <li>Share market prices with approved players on the same game and server.</li>
-        </ul>
+  <body class="landing">
+    <a class="skip-link" href="#sign-in">Skip to sign in</a>
+    <header class="landing-header">
+      <a class="brand" href="/" aria-label="Dofus Economy home">
+        <svg class="brand-mark" viewBox="0 0 40 44" aria-hidden="true" focusable="false">
+          <path d="M20 1 38 12v20L20 43 2 32V12Z" fill="#153e35"/>
+          <path d="m20 10 10 12-10 12L10 22Z" fill="#e2bc70"/>
+          <path d="m20 10 3 12-3 12-10-12Z" fill="#f7df9f"/>
+        </svg>
+        <span>Dofus <strong>Economy</strong></span>
+      </a>
+      <nav aria-label="Project information">
+        <a href="/about">About</a>
+        <a href="/privacy">Privacy</a>
+      </nav>
+    </header>
+
+    <main class="signin-layout">
+      <section class="story-panel" aria-labelledby="story-title">
+        <svg class="story-contours" viewBox="0 0 620 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+          <g fill="none" stroke="#467365" stroke-width="1">
+            <ellipse cx="550" cy="620" rx="200" ry="420" transform="rotate(-30 550 620)"/>
+            <ellipse cx="550" cy="620" rx="245" ry="465" transform="rotate(-30 550 620)"/>
+            <ellipse cx="550" cy="620" rx="290" ry="510" transform="rotate(-30 550 620)"/>
+            <ellipse cx="550" cy="620" rx="335" ry="555" transform="rotate(-30 550 620)"/>
+            <ellipse cx="550" cy="620" rx="380" ry="600" transform="rotate(-30 550 620)"/>
+          </g>
+        </svg>
+        <div class="story-copy">
+          <p class="story-eyebrow"><span aria-hidden="true">✦</span> A companion for your next craft</p>
+          <h1 id="story-title">Less guesswork.<br>Better trades.<br><em>More kamas.</em></h1>
+          <p class="story-description">From your first ingredient to your last sale, find a clearer view of your Dofus economy.</p>
+        </div>
+
+        <figure class="ledger-scene" aria-label="Illustrative crafting ledger with example costs and profit, not live market data">
+          <svg class="craft-tokens" viewBox="0 0 480 270" aria-hidden="true" focusable="false">
+            <ellipse cx="84" cy="225" rx="63" ry="12" fill="#0b2d25"/>
+            <g stroke="#af8139" stroke-width="2">
+              <path d="M26 192v15c0 16 100 16 100 0v-15Z" fill="#bd8c40"/>
+              <ellipse cx="76" cy="192" rx="50" ry="13" fill="#e5bc68"/>
+              <path d="M35 172v15c0 16 100 16 100 0v-15Z" fill="#c99a4d"/>
+              <ellipse cx="85" cy="172" rx="50" ry="13" fill="#f1cf81"/>
+              <path d="M27 152v15c0 16 100 16 100 0v-15Z" fill="#d8ac5d"/>
+              <ellipse cx="77" cy="152" rx="50" ry="13" fill="#f9dfa0"/>
+              <ellipse cx="77" cy="152" rx="35" ry="8" fill="none"/>
+            </g>
+            <path d="m373 22 48 28-5 59-43 31-43-31-5-59Z" fill="#82ba9c" stroke="#badcc0" stroke-width="2"/>
+            <path d="m373 22 15 52-15 66-21-66Z" fill="#d1e6bd"/>
+            <path d="m325 50 27 24-22 35m91-59-33 24 28 35" fill="none" stroke="#badcc0" stroke-width="2"/>
+            <g fill="#e2bc70">
+              <path d="m440 131 3 10 10 3-10 3-3 10-3-10-10-3 10-3Z"/>
+              <path d="m112 45 2 7 7 2-7 2-2 7-2-7-7-2 7-2Z"/>
+              <circle cx="296" cy="17" r="3"/>
+            </g>
+          </svg>
+          <div class="example-ledger">
+            <div class="ledger-heading"><span class="ledger-icon" aria-hidden="true">✧</span><span>THE CRAFTING LEDGER</span><span class="example-tag">Example</span></div>
+            <div class="ledger-row"><span>Ingredient cost</span><span>42,000 <small>k</small></span></div>
+            <div class="ledger-row"><span>Selling price</span><span>68,000 <small>k</small></span></div>
+            <div class="ledger-profit"><span>Estimated profit</span><strong>+26,000 <small>k</small></strong></div>
+          </div>
+          <figcaption>Little details. A bigger picture.</figcaption>
+        </figure>
+        <div class="worlds-note"><span>Dofus Touch</span><span aria-hidden="true">✦</span><span>Dofus</span></div>
       </section>
-      <footer>
-        <p><a href="/about">About the project</a> · <a href="/privacy">Privacy policy</a></p>
-        <p>An unofficial fan project, independent of Ankama.</p>
-      </footer>
+
+      <section id="sign-in" class="signin-panel" aria-labelledby="signin-title" tabindex="-1">
+        <p class="signin-eyebrow">YOUR PERSONAL ECONOMY WORKSPACE</p>
+        <h2 id="signin-title">Make your next<br>craft count.</h2>
+        <p class="signin-description">Your recipes, prices, and sales.<br>All the pieces, in one place.</p>
+
+        <a class="google-signin" href="/oauth2/start?rd=%2F">
+          <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65Z"/>
+            <path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.87 23.87 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.97-6.19Z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.15 1.45-4.92 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z"/>
+          </svg>
+          <span>Sign in with Google</span>
+        </a>
+        <p class="signin-reassurance">
+          <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false"><path d="m10 2 6 2.5v5c0 4-6 7-6 7s-6-3-6-7v-5Z"/><path d="m7 9 2 2 4-4"/></svg>
+          Your Google password stays with Google.
+        </p>
+
+        <ul class="workspace-benefits" aria-label="Inside your workspace">
+          <li>
+            <span class="benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 8 5v8l-8 5-8-5V8Z"/><path d="m4 8 8 5 8-5m-8 5v8m-4-16 8 5"/></svg></span>
+            <div><h3>Know what’s worth crafting</h3><p>Compare recipes, costs, and potential profit.</p></div>
+          </li>
+          <li>
+            <span class="benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5Zm3 4h8m-8 4h3m-3 4h3m3-4h2m-2 4h2"/></svg></span>
+            <div><h3>Keep every sale in view</h3><p>Your listings, sales history, and reports.</p></div>
+          </li>
+          <li>
+            <span class="benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6Z"/><path d="m8 12 3 3 5-6"/></svg></span>
+            <div><h3>Shared prices. Private sales.</h3><p>Market knowledge together. Your records stay yours.</p></div>
+          </li>
+        </ul>
+
+        <aside class="access-explainer" aria-label="Access for new players">
+          <h3>New around here?</h3>
+          <p>Sign in to request access. Once approved, you can track your own listings, sales, and crafting plans.</p>
+        </aside>
+      </section>
     </main>
+    <footer class="landing-footer">
+      <p>Made for players who enjoy the numbers as much as the game.</p>
+      <p>An unofficial fan project. Not affiliated with Ankama.</p>
+    </footer>
   </body>
 </html>
