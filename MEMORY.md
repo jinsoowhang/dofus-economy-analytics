@@ -1,8 +1,31 @@
 # Memory
 
-**Last updated:** 2026-10-19
+**Last updated:** 2026-10-20
 
 ## Dofus Economy Analytics
+
+- **Touch / Blair now writes to the VPS.** On October 20 the owner requested
+  their sales-backed Touch data on the hosted site. Transferred a fresh,
+  integrity-checked online backup to
+  `/var/lib/dofus-touch-economy/dofus_touch.sqlite3`, preserved the hosted Google
+  account registry and verified owner binding, and switched the production mount.
+  Every operational table/field matches the local snapshot: 827 sold, 203 active,
+  3,050 price observations, 11,400 items, and 7,847 recipes at cutover. Transferred
+  and hash-verified 11,390 Touch icons; ten were already missing locally.
+  Screenshot catch-up must now plan, back up, rehearse, and write through the
+  existing private SSH/container workflow against this authoritative VPS Touch
+  database. The local Touch database is a retained pre-cutover copy, not another
+  writer; no cross-host synchronization exists. No Slack worker or cloud sync was
+  enabled. PC / Tal Kasha remains unchanged: local PC data is authoritative, and
+  hosted PC remains empty. SMTP is still unconfigured and does not block the
+  approved owner's access to their data. Private cutover/rollback evidence lives
+  under `data/reports/vps-touch-cutover-2026-10-20/`.
+
+- October 20 pre-cutover read-only hosted/local parity check: all 110 application,
+  migration, and deployment files match by SHA-256. Hosted app and public pages are healthy,
+  but both hosted worlds then had zero items, prices, recipes, and Sales rows in
+  disposable login-check state. Touch's later production cutover is recorded above.
+  Matching source alone does not imply matching data.
 
 - The owner requested renaming the repository and local project to
   `dofus-economy-analytics`. GitHub is now
@@ -118,8 +141,8 @@
   Only SMTP acceptance permits the sent message. Failed attempts retry at most
   once per ten minutes; the owner can retry from Access requests. Successful sends
   are not repeated on refresh. The Google OAuth Web credential cannot send mail.
-  Asked for a private SMTP configuration path and confirmation of owner sign-in;
-  neither has been supplied during this resumed session.
+  A private SMTP configuration path is still needed. The October 20 cutover
+  verified that the owner has since signed in and has a bound Google subject.
 - October 18 hosting progress: the owner supplied a valid Google OAuth Web
   client with the exact public callback. Its secret is installed only in private
   VPS configuration. The domain now routes through the Google login gateway;
@@ -128,15 +151,15 @@
   unauthenticated APIs return 401. Nine unrelated proxy hosts are unchanged.
   NPM's actual internal peer changed to `.3` after restart; the private config uses
   the inspected current peer, not the older `.2` preparation value.
-  The deployed app currently uses disposable empty databases for both worlds;
-  **local SQLite remains authoritative and live data has not been transferred**.
-  Owner Google sign-in and real invite mail must be verified before final cutover.
-  Next: configure SMTP, verify real owner/applicant sign-in and request delivery,
-  stop/check local writers, and take fresh online backups of both databases.
-  Preserve the VPS Touch account registry when replacing disposable state, so
-  verified subjects, approvals, and notification state survive. Transfer and verify
-  both databases plus the shared icon cache, then switch to production state.
-  Screenshot reconciliation must target the VPS after that switch. Private progress and
+  At that checkpoint, the deployed app used disposable empty databases for both
+  worlds and local SQLite remained authoritative. The October 20 Touch-only
+  cutover above supersedes that state and verified owner sign-in. Remaining
+  access-request work: configure SMTP, verify applicant sign-in and request delivery.
+  A future PC cutover must stop local PC writers, back up local PC and current
+  hosted state, inspect hosted PC for intervening writes, and transfer only the
+  verified PC database and its icons. Preserve the production Touch database and
+  its account registry; never overwrite them with the stale local Touch copy.
+  Touch screenshot reconciliation now targets the VPS. Private progress and
   checks: `data/reports/vps-deployment-2026-10-18/status.json`.
 - VPS deployment uses the existing Nginx Proxy Manager and a Docker Google OAuth2
   Proxy gateway, with Google identity headers overwritten by the gateway and
